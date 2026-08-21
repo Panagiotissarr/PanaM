@@ -31,29 +31,41 @@ public class MenuUI : MonoBehaviour
         }
     }
 
-    private readonly List<ToggleInfo> _allToggles = new();
+    private List<ToggleInfo> _allToggles = new();
     private string _searchQuery = "";
     #endregion
 
+    private void InitializeIfNeeded()
+    {
+        _tabs ??= new List<ITab>();
+        _allToggles ??= new List<ToggleInfo>();
+        _searchQuery ??= "";
+
+        if (_tabs.Count == 0)
+        {
+            _tabs.Add(new MovementTab());
+            _tabs.Add(new ESPTab());
+            _tabs.Add(new RolesTab());
+            _tabs.Add(new ShipTab());
+            _tabs.Add(new ChatTab());
+            _tabs.Add(new AnimationsTab());
+            _tabs.Add(new ConsoleTab());
+            _tabs.Add(new HostOnlyTab());
+            _tabs.Add(new PassiveTab());
+            _tabs.Add(new ModesTab());
+            _tabs.Add(new ConfigTab());
+        }
+
+        if (_allToggles.Count == 0)
+        {
+            PopulateToggles();
+        }
+    }
+
     private void Start()
     {
-        // Add all tabs on start
-        _tabs.Add(new MovementTab());
-        _tabs.Add(new ESPTab());
-        _tabs.Add(new RolesTab());
-        _tabs.Add(new ShipTab());
-        _tabs.Add(new ChatTab());
-        _tabs.Add(new AnimationsTab());
-        _tabs.Add(new ConsoleTab());
-        _tabs.Add(new HostOnlyTab());
-        _tabs.Add(new PassiveTab());
-        _tabs.Add(new ModesTab());
-        _tabs.Add(new ConfigTab());
-        // _tabs.Add(new OverloadTab());
+        InitializeIfNeeded();
 
-        PopulateToggles();
-
-        // Instantiate 2D area of MenuUI
         _windowRect = new(
             Screen.width / 2f - windowWidth / 2f,
             Screen.height / 2f - windowHeight / 2f,
@@ -215,6 +227,8 @@ public class MenuUI : MonoBehaviour
 
     public void WindowFunction(int windowID)
     {
+        InitializeIfNeeded();
+
         GUILayout.BeginHorizontal();
         GUILayout.Label("Search:", GUILayout.Width(60));
         _searchQuery = GUILayout.TextField(_searchQuery, GUILayout.ExpandWidth(true));
@@ -331,7 +345,7 @@ public class MenuUI : MonoBehaviour
 
         GUILayout.EndHorizontal();
 
-        GUI.DragWindow();
+        GUI.DragWindow(new Rect(0, 0, windowWidth, 25));
     }
 
     #region Search Bar Helpers
