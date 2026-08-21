@@ -1,0 +1,234 @@
+#include "pch-il2cpp.h"
+#include "_hooks.h"
+#include "state.hpp"
+#include "logger.h"
+#include "utility.h"
+#include "replay.hpp"
+#include "profiler.h"
+#include "game.h"
+
+float dShipStatus_CalculateLightRadius(ShipStatus* __this, NetworkedPlayerInfo* player, MethodInfo* method) {
+    if (State.ShowHookLogs) Log.Debug("Hook dShipStatus_CalculateLightRadius executed", false);
+    if (IsHost() && State.TaskSpeedrun && State.GameLoaded && State.mapType != Settings::MapType::Airship)
+        State.SpeedrunTimer += Time_get_deltaTime(NULL);
+    CosmeticsCache_PopulateFromPlayers((CosmeticsCache*)__this->fields._CosmeticsCache_k__BackingField, NULL);
+    switch (__this->fields.Type) {
+    case ShipStatus_MapType__Enum::Ship:
+        if (State.mapType != Settings::MapType::Airship) State.mapType = Settings::MapType::Ship;
+        break;
+    case ShipStatus_MapType__Enum::Hq:
+        State.mapType = Settings::MapType::Hq;
+        break;
+    case ShipStatus_MapType__Enum::Pb:
+        State.mapType = Settings::MapType::Pb;
+        break;
+    case ShipStatus_MapType__Enum::Fungle:
+        State.mapType = Settings::MapType::Fungle;
+        break;
+    }
+
+    if (!State.PanicMode && State.MaxVision)
+        return 420.F;
+    else
+        return ShipStatus_CalculateLightRadius(__this, player, method);
+}
+
+void dShipStatus_OnEnable(ShipStatus* __this, MethodInfo* method) {
+    if (State.ShowHookLogs) Log.Debug("Hook dShipStatus_OnEnable executed", false);
+    try {
+        State.BlinkPlayersTab = false;
+
+        Replay::Reset();
+
+        State.MatchStart = std::chrono::system_clock::now();
+        State.MatchCurrent = State.MatchStart;
+
+        State.selectedDoor = SystemTypes__Enum::Hallway;
+        State.mapDoors.clear();
+        State.pinnedDoors.clear();
+
+        il2cpp::Array allDoors = __this->fields.AllDoors;
+
+        for (auto door : allDoors) {
+            if (std::find(State.mapDoors.begin(), State.mapDoors.end(), door->fields.Room) == State.mapDoors.end())
+                State.mapDoors.push_back(door->fields.Room);
+        }
+
+        std::sort(State.mapDoors.begin(), State.mapDoors.end());
+
+        if (!State.PanicMode && State.confuser && State.confuseOnStart)
+            ControlAppearance(true);
+
+        if (State.AutoFakeRole) {
+            if (!State.SafeMode) State.rpcQueue.push(new RpcSetRole(*Game::pLocalPlayer, (RoleTypes__Enum)State.FakeRole));
+        }
+
+        //if (!State.mapDoors.empty() && Constants_1_ShouldFlipSkeld(NULL))
+            //State.FlipSkeld = true; fix later
+
+//          if (State.FlipSkeld && IsHost() && GameOptions().GetByte(app::ByteOptionNames__Enum::MapId) != 3) {
+//              GameOptions().SetByte(app::ByteOptionNames__Enum::MapId, 3);
+            /*if (GameOptionsManager_get_Instance && GameOptionsManager_get_CurrentGameOptions && GameOptionsManager_set_GameHostOptions
+                && GameManager_get_Instance && GameManager_get_LogicOptions && LogicOptions_SyncOptions) {
+                auto gameOptionsManager = GameOptionsManager_get_Instance(NULL);
+                GameManager* gameManager = GameManager_get_Instance(NULL);
+                if (gameOptionsManager != nullptr) {
+                    auto currentOptions = GameOptionsManager_get_CurrentGameOptions(gameOptionsManager, NULL);
+                    if (currentOptions != nullptr)
+                        GameOptionsManager_set_GameHostOptions(gameOptionsManager, currentOptions, NULL);
+                }
+                if (gameManager != nullptr) {
+                    auto logicOptions = GameManager_get_LogicOptions(gameManager, NULL);
+                    if (logicOptions != nullptr)
+                        LogicOptions_SyncOptions(logicOptions, NULL);
+                }
+            }*/
+    }
+    catch (...) {
+        LOG_ERROR("Exception occurred in ShipStatus_OnEnable (ShipStatus)");
+    }
+    ShipStatus_OnEnable(__this, method);
+}
+
+static bool IsSabotageTriggerAmount(SystemTypes__Enum systemType, int32_t amount) {
+    switch (systemType) {
+    case SystemTypes__Enum::Electrical: return amount >= 5;
+    case SystemTypes__Enum::MushroomMixupSabotage: return amount >= 1;
+    default: return amount >= 128;
+    }
+}
+
+void dShipStatus_RpcUpdateSystem(ShipStatus* __this, SystemTypes__Enum systemType, int32_t amount, MethodInfo* method) {
+    if (State.ShowHookLogs) Log.Debug("Hook dShipStatus_RpcUpdateSystem executed", false);
+    if (!State.PanicMode && State.DisabledSabotageTypes.count((int)systemType) &&
+        IsSabotageTriggerAmount(systemType, amount))
+        return;
+    ShipStatus_RpcUpdateSystem(__this, systemType, amount, method);
+}
+
+void dShipStatus_RpcCloseDoorsOfType(ShipStatus* __this, SystemTypes__Enum type, MethodInfo* method) {
+    if (State.ShowHookLogs) Log.Debug("Hook dShipStatus_RpcCloseDoorsOfType executed", false);
+    if (!State.PanicMode && State.DisabledSabotageTypes.count((int)SystemTypes__Enum::Doors))
+        return;
+    ShipStatus_RpcCloseDoorsOfType(__this, type, method);
+}
+
+void dShipStatus_HandleRpc(ShipStatus* __this, uint8_t callId, MessageReader* reader, MethodInfo* method) {
+    if (State.ShowHookLogs) Log.Debug("Hook dShipStatus_HandleRpc executed", false);
+    if (callId != 27 && callId != 35) return;
+    int32_t pos = reader->fields._position, head = reader->fields.readHead;
+    auto systemType = (SystemTypes__Enum)MessageReader_ReadByte(reader, NULL);
+    reader->fields._position = pos;
+    reader->fields.readHead = head;
+    if (systemType == SystemTypes__Enum::Ventilation ||
+        (callId == 35 && systemType == SystemTypes__Enum::Security) ||
+        systemType == SystemTypes__Enum::Decontamination ||
+        systemType == SystemTypes__Enum::Decontamination2 ||
+        systemType == SystemTypes__Enum::Decontamination3 ||
+        (callId == 35 && systemType == SystemTypes__Enum::MedBay))
+        return ShipStatus_HandleRpc(__this, callId, reader, method);
+    if (!State.PanicMode && State.DisableSabotages) return;
+    if (!State.PanicMode && callId == 27 &&
+        State.DisabledSabotageTypes.count((int)SystemTypes__Enum::Doors))
+        return;
+    if (!State.PanicMode && State.DisabledSabotageTypes.count((int)systemType))
+        return;
+    ShipStatus_HandleRpc(__this, callId, reader, method);
+}
+
+bool DetectCheatSabotageResult(PlayerControl* player, bool result) {
+    if (State.Enable_SMAC && State.SMAC_CheckSabotage) SMAC_OnCheatDetected(player, "Bad Sabotage");
+    return result;
+}
+
+bool DetectCheatSabotage(SystemTypes__Enum systemType, PlayerControl* player, uint8_t amount) {
+    /*uint8_t mapId = (uint8_t)State.mapType;
+    if (systemType == SystemTypes__Enum::Sabotage && PlayerIsImpostor(GetPlayerData(player)))
+        return false;
+    else if (systemType == SystemTypes__Enum::LifeSupp &&
+        (mapId == 0 || mapId == 1) && (amount == 64 || amount == 65))
+        return false;
+    // Only Skeld and Mira have oxygen sabotage
+    else if (systemType == SystemTypes__Enum::Comms) {
+        if (amount == 0 && mapId != 1 && mapId != 4) return false;
+        if ((amount == 64 || amount == 65 || amount == 32 || amount == 33 || amount == 16 || amount == 17)
+            && (mapId == 1 || mapId == 5)) return false;
+    }
+    else if (systemType == SystemTypes__Enum::Electrical) {
+        if (mapId != 4 && amount < 5) return false;
+        else if (amount >= 5 && !(State.DisableSabotages && IsHost())) {
+            return DetectCheatSabotageResult(player, false);
+        }
+    }
+    else if (systemType == SystemTypes__Enum::Laboratory &&
+        mapId == 2 && (amount == 64 || amount == 65 || amount == 32 || amount == 33))
+        return false;
+    else if (systemType == SystemTypes__Enum::Reactor &&
+        mapId != 2 && mapId != 3 && (amount == 64 || amount == 65 || amount == 32 || amount == 33))
+        return false;
+    else if (systemType == SystemTypes__Enum::HeliSabotage &&
+        mapId == 3 && (amount == 64 || amount == 65 || amount == 16 || amount == 17 || amount == 32 || amount == 33))
+        return false;
+    else if (systemType == SystemTypes__Enum::MushroomMixupSabotage) {
+        if (mapId == 4 && !(State.DisableSabotages && IsHost())) {
+            return DetectCheatSabotageResult(player, false);
+        }
+    }
+    else if (State.InMeeting && MeetingHud__TypeInfo->static_fields->Instance->fields.state != MeetingHud_VoteStates__Enum::Animating) {
+        if (!(State.DisableSabotages && IsHost())) {
+            return DetectCheatSabotageResult(player, false);
+        }
+    }
+    return DetectCheatSabotageResult(player, true);*/
+    return false;
+}
+
+void dShipStatus_UpdateSystem(ShipStatus* __this, SystemTypes__Enum systemType, PlayerControl* player, uint8_t amount, MethodInfo* method) {
+    if (State.ShowHookLogs) Log.Debug("Hook dShipStatus_UpdateSystem executed", false);
+    LOG_DEBUG(std::format("SystemType {} updated with amount {}", (std::string)TranslateSystemTypes(systemType), amount).c_str());
+    if (systemType == SystemTypes__Enum::Ventilation ||
+        systemType == SystemTypes__Enum::Security ||
+        systemType == SystemTypes__Enum::Decontamination ||
+        systemType == SystemTypes__Enum::Decontamination2 ||
+        systemType == SystemTypes__Enum::Decontamination3 ||
+        systemType == SystemTypes__Enum::MedBay)
+        return ShipStatus_UpdateSystem(__this, systemType, player, amount, method);
+    if (!State.PanicMode && State.DisableSabotages) return;
+
+    if (!State.PanicMode && IsHost() && IsSabotageTriggerAmount(systemType, amount)) {
+        if (State.DisabledSabotageTypes.count((int)systemType)) {
+            RepairSabotage(player);
+            return;
+        }
+        if (systemType == SystemTypes__Enum::Doors &&
+            State.DisabledSabotageTypes.count((int)SystemTypes__Enum::Doors))
+            return;
+    }
+    if (player != nullptr && systemType != SystemTypes__Enum::Electrical) {
+        auto evtPlayer = GetEventPlayerControl(player);
+        if (evtPlayer.has_value()) {
+            bool isSabotage = amount >= 128;
+            SABOTAGE_ACTIONS action = isSabotage ? SABOTAGE_ACTIONS::SABOTAGE_CALL : SABOTAGE_ACTIONS::SABOTAGE_FIX;
+            synchronized(Replay::replayEventMutex) {
+                State.liveConsoleEvents.emplace_back(std::make_unique<SabotageEvent>(evtPlayer.value(), systemType, action));
+            }
+        }
+    }
+
+    ShipStatus_UpdateSystem(__this, systemType, player, amount, method);
+}
+
+void dShipStatus_AddTasksFromList(ShipStatus* __this, int32_t* start, int32_t count, void* tasks, void* usedTaskTypes, List_1_NormalPlayerTask_* unusedTasks, MethodInfo* method) {
+    if (State.DisableMedbayScan || !State.DisabledTaskTypes.empty()) {
+        il2cpp::List<List_1_NormalPlayerTask_> taskList = unusedTasks;
+        for (int i = (int)taskList.size() - 1; i >= 0; i--) {
+            if ((int)taskList.size() <= count) break; 
+            auto taskType = taskList[i]->fields._.TaskType;
+            bool remove = (State.DisableMedbayScan && taskType == TaskTypes__Enum::SubmitScan)
+                || State.DisabledTaskTypes.count((int)taskType);
+            if (remove) taskList.erase(i);
+        }
+        unusedTasks = taskList.get();
+    }
+    ShipStatus_AddTasksFromList(__this, start, count, tasks, usedTaskTypes, unusedTasks, method);
+}
