@@ -33,6 +33,7 @@ public class MenuUI : MonoBehaviour
 
     private List<ToggleInfo> _allToggles = new();
     private string _searchQuery = "";
+    private bool _searchBarFocused = false;
     #endregion
 
     private void InitializeIfNeeded()
@@ -231,12 +232,68 @@ public class MenuUI : MonoBehaviour
 
         GUILayout.BeginHorizontal();
         GUILayout.Label("Search:", GUILayout.Width(60));
-        _searchQuery = GUILayout.TextField(_searchQuery, GUILayout.ExpandWidth(true));
+
+        string displayText = string.IsNullOrEmpty(_searchQuery) ? "Type here..." : _searchQuery;
+        if (_searchBarFocused)
+        {
+            displayText = _searchQuery + (System.DateTime.Now.Millisecond / 500 % 2 == 0 ? "|" : "");
+        }
+
+        GUIStyle searchBoxStyle = new GUIStyle(GUI.skin.box);
+        if (_searchBarFocused)
+        {
+            searchBoxStyle.normal.textColor = Color.white;
+        }
+        else
+        {
+            searchBoxStyle.normal.textColor = Color.gray;
+        }
+
+        if (GUILayout.Button(displayText, searchBoxStyle, GUILayout.ExpandWidth(true), GUILayout.Height(25)))
+        {
+            _searchBarFocused = true;
+        }
+        Rect searchRect = GUILayoutUtility.GetLastRect();
+
         if (GUILayout.Button("Clear", GUILayout.Width(60)))
         {
             _searchQuery = "";
+            _searchBarFocused = false;
         }
         GUILayout.EndHorizontal();
+
+        Event e = Event.current;
+        if (e != null)
+        {
+            if (e.type == EventType.MouseDown)
+            {
+                if (!searchRect.Contains(e.mousePosition))
+                {
+                    _searchBarFocused = false;
+                }
+            }
+            else if (_searchBarFocused && e.type == EventType.KeyDown)
+            {
+                if (e.keyCode == KeyCode.Backspace)
+                {
+                    if (_searchQuery.Length > 0)
+                    {
+                        _searchQuery = _searchQuery.Substring(0, _searchQuery.Length - 1);
+                    }
+                    e.Use();
+                }
+                else if (e.keyCode == KeyCode.Escape || e.keyCode == KeyCode.Return)
+                {
+                    _searchBarFocused = false;
+                    e.Use();
+                }
+                else if (e.character != '\0' && e.character != '\n' && e.character != '\r' && e.character != '\t' && e.character != '\b')
+                {
+                    _searchQuery += e.character;
+                    e.Use();
+                }
+            }
+        }
 
         GUILayout.Space(10);
 
