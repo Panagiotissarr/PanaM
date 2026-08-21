@@ -1,0 +1,92 @@
+name: Build PanaM
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  release:
+    types: [ published ]
+
+permissions:
+  contents: write
+
+env:
+  DOTNET_VERSION: '8.0.x'
+
+jobs:
+  Build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore src/PanaM.csproj
+
+      - name: Build
+        run: dotnet build src/PanaM.csproj -c Release --no-restore
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $dll = Get-ChildItem -Path src/bin/Release -Recurse -Filter PanaM.dll | Select-Object -First 1
+          if (-not $dll) {
+            Write-Host "::error::PanaM.dll not found"
+            exit 1
+          }
+          $version = (Select-Xml -Path src/PanaM.csproj -XPath "//VersionPrefix").Node.InnerText
+          Compress-Archive -Path $dll.FullName -DestinationPath "PanaM-$version.zip" -Force
+          Write-Host "::notice::Built PanaM v$version ($((Get-Item $dll.FullName).Length) bytes)"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PanaM-Release
+          path: PanaM-*.zip
+          if-no-files-found: error
+
+  AttachToRelease:
+    runs-on: ubuntu-latest
+    needs: [ Build ]
+    if: github.event_name == 'release'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: PanaM-Release
+          path: dist
+
+      - name: Attach zip to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release upload "$GITHUB_REF_NAME" dist/*.zip --clobber
+
+  PublishLatest:
+    runs-on: ubuntu-latest
+    needs: [ Build ]
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: PanaM-Release
+          path: dist
+
+      - name: Update latest prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release delete latest --yes --cleanup-tag || true
+          gh release create latest dist/*.zip \
+            --title "PanaM latest build" \
+            --notes "Automated build of commit ${{ github.sha }}" \
+            --prerelease

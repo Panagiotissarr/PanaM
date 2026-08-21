@@ -1,24 +1,5 @@
-<p align="center">
-  <img src="https://scp222thj.dev/static/images/panamLogo.png">
-</p>
-
-<p align="center">
-  <a href="https://discord.gg/YYcYf88jAb">
-    <img hspace="6" src="https://img.shields.io/badge/Join%20Us%20on-Discord-blue?style=flat&logo=discord" alt="Discord">
-  </a>
-
-  <a href="https://ko-fi.com/scp222thj">
-    <img hspace="6" src="https://img.shields.io/badge/Support%20scp222thj-Ko--fi-ff5f5f?style=flat&logo=ko-fi" alt="Ko-fi">
-  </a>
-
-  <a href="https://github.com/astra1dev#%EF%B8%8F-support-me">
-    <img hspace="6" src="https://img.shields.io/badge/Support%20astra1dev-Monero-FF6600?style=flat&logo=monero" alt="Monero">
-  </a>
-
-  <a href="https://github.com/scp222thj/PanaM/releases">
-    <img hspace="6" src="https://img.shields.io/github/downloads/scp222thj/PanaM/total?style=flat&logo=github&label=Total%20Downloads&color=2ECC71" alt="Downloads">
-  </a>
-</p>
+# Fork notice
+## This is a fork of [Malum Menu](https://github.com/scp222thj/PanaM) All credits to him
 
 <p align="center">
   <b>An easy-to-use Among Us cheat menu with a simple GUI and lots of useful modules.</b>
@@ -35,36 +16,12 @@
 - [❓ FAQ](#-faq)
 - [⚠️ Disclaimer](#️-disclaimer)
 
-# 🎁 Releases
-
-| Mod Version| Among Us - Version | Link |
-|----------|-------------|-----------------|
-| v3.2.0 | 17.4 ( 2026.6.5 )<br>17.3 ( 2026.3.31 ) | [Download](https://github.com/scp222thj/PanaM/releases/tag/v3.2.0) |
-| v3.1.1 | 17.3 ( 2026.3.31 ) | [Download](https://github.com/scp222thj/PanaM/releases/tag/v3.1.1) |
-| v3.1.0 | 17.3 ( 2026.3.31 ) | [Download](https://github.com/scp222thj/PanaM/releases/tag/v3.1.0) |
-| v3.0.2 | 17.2.2 ( 2026.3.17 )<br>17.2.1 ( 2026.2.24 ) | [Download](https://github.com/scp222thj/PanaM/releases/tag/v3.0.2) |
-| v3.0.1 | 17.2.2 ( 2026.3.17 )<br>17.2.1 ( 2026.2.24 ) | [Download](https://github.com/scp222thj/PanaM/releases/tag/v3.0.1) |
-| v3.0.0 | 17.2.1 ( 2026.2.24 ) | [Download](https://github.com/scp222thj/PanaM/releases/tag/v3.0.0) |
-| v2.4.2 | 2024.9.4 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v2.4.2) |
-| v2.4.1 | 2024.8.13 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v2.4.1) |
-| v2.4.0 | 2024.6.18 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v2.4.0) |
-| v2.3.1 | 2024.6.18 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v2.3.1) |
-| v2.3.0 | 2024.6.4 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v2.3.0) |
-| v2.2.0 | 2024.3.5 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v2.2.0) |
-| v2.1.0 | 2023.11.28 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v2.1.0) |
-| v2.0.0 | 2023.11.28 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v2.0.0) |
-| v1.2.1 | 2023.11.28 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v1.2.1) |
-| v1.2.0 | 2023.11.28 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v1.2.0) |
-| v1.1.2 | 2023.7.12<br>2023.7.11 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v1.1.2) |
-| v1.1.1 | 2023.7.12<br>2023.7.11 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v1.1.1) |
-| v1.1.0 | 2023.7.12<br>2023.7.11 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v1.1.0) |
-| v1.0.0 | 2023.7.12<br>2023.7.11 | [Download](https://github.com/scp222thj/PanaM/releases/tag/v1.0.0) |
 
 # ⬇️ Installation
 
 ## 🪟 Windows
 
-1. Download the latest **PanaM zip pack** from [here](https://github.com/scp222thj/PanaM/releases/latest).
+1. Download the latest **PanaM zip pack** from [here](https://github.com/panagiotissarr/PanaM/releases/latest).
     - **For Steam or Itch.io:** Download `PanaM-VERSION-Steam-Itch.zip`.
     - **For Microsoft Store, Epic Games Store, or Xbox App:** Download `PanaM-VERSION-MicrosoftStore-EpicGames-XboxApp.zip`.
 
@@ -127,7 +84,7 @@
 - Unlock all of the game's cosmetics for FREE
 - No more annoying disconnect penalties
 
-For a complete list of all of PanaM's features, click [here](https://github.com/scp222thj/PanaM/blob/main/FEATURES.md)
+For a complete list of all of PanaM's features, click [here](https://github.com/panagiotissarr/PanaM/blob/main/FEATURES.md)
 
 # ❓ FAQ
 
@@ -164,7 +121,7 @@ When installing PanaM for the first time, it will take **MUCH** longer than usua
 
 <img src="https://scp222thj.dev/static/images/bepinexConsole.png" alt="drawing" width="550"/>
 
-<br>If you are still having issues, feel free to open a new Github issue [here](https://github.com/scp222thj/PanaM/issues/new), or you can ask for help in our Discord server: [discord.gg/YYcYf88jAb](https://discord.gg/YYcYf88jAb)
+<br>If you are still having issues, feel free to open a new Github issue [here](https://github.com/panagiotissarr/PanaM/issues/new), or you can ask for help in our Discord server: [discord.gg/YYcYf88jAb](https://discord.gg/YYcYf88jAb)
 
 </details>
 
@@ -172,7 +129,7 @@ When installing PanaM for the first time, it will take **MUCH** longer than usua
 
 <summary><h2>👾 I found a bug OR I would like to suggest a new feature</h2></summary>
 
-To let me know, you can open a new Github issue [here](https://github.com/scp222thj/PanaM/issues/new), or you can discuss it on our Discord server: [discord.gg/YYcYf88jAb](https://discord.gg/YYcYf88jAb)
+To let me know, you can open a new Github issue [here](https://github.com/panagiotissarr/PanaM/issues/new), or you can discuss it on our Discord server: [discord.gg/YYcYf88jAb](https://discord.gg/YYcYf88jAb)
 
 If you want, you can also contribute to the project and implement the change yourself by making a pull request. All contributions are welcome!
 
