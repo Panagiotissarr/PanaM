@@ -47,6 +47,7 @@ public static class Theme
     private static Texture2D _shadowTex;
     private static Texture2D _scrollThumbTex;
     private static Texture2D _sliderThumbTex;
+    private static Texture2D _sliderTrackTex;
     private static readonly Dictionary<int, Texture2D> RoundedTextures = new();
     private static readonly Dictionary<(int, int), GUIStyle> SliceStyles = new();
 
@@ -282,6 +283,7 @@ public static class Theme
         _shadowTex = MakeShadow();
         _scrollThumbTex = MakeRounded(24, 24, 3f, new Color(1f, 1f, 1f, 0.30f), default, 0);
         _sliderThumbTex = MakeCircle(20, 240);
+        _sliderTrackTex = MakeRounded(24, 8, 4f, new Color(1f, 1f, 1f, 0.12f), default, 0);
         return _white;
     }
 
@@ -304,7 +306,7 @@ public static class Theme
         var s = new GUIStyle
         {
             name = "PanaMSlice",
-            border = new RectOffset(border, border, border, border),
+            border = new RectOffset { left = border, right = border, top = border, bottom = border },
             padding = new RectOffset(),
             margin = new RectOffset()
         };
@@ -353,8 +355,8 @@ public static class Theme
                 font = UIFont,
                 fontSize = 13,
                 alignment = TextAnchor.MiddleCenter,
-                border = new RectOffset(RadiusButton + 2, RadiusButton + 2, RadiusButton + 2, RadiusButton + 2),
-                padding = new RectOffset(10, 10, 6, 6)
+                border = new RectOffset { left = RadiusButton + 2, right = RadiusButton + 2, top = RadiusButton + 2, bottom = RadiusButton + 2 },
+                padding = new RectOffset { left = 10, right = 10, top = 6, bottom = 6 }
             };
             _buttonStyle.normal.background = idle;
             _buttonStyle.normal.textColor = TextPrimary;
@@ -377,13 +379,13 @@ public static class Theme
             if (_cardStyle != null) return _cardStyle;
             EnsureCore();
 
-            var tex = MakeRounded(64, RadiusCard, new Color(1f, 1f, 1f, 0.045f), HairlineColor, 1);
+            var tex = MakeRounded(64, 64, RadiusCard, new Color(1f, 1f, 1f, 0.045f), HairlineColor, 1);
 
             _cardStyle = new GUIStyle
             {
-                border = new RectOffset(RadiusCard + 2, RadiusCard + 2, RadiusCard + 2, RadiusCard + 2),
-                padding = new RectOffset(12, 12, 10, 10),
-                margin = new RectOffset(0, 0, 0, 10)
+                border = new RectOffset { left = RadiusCard + 2, right = RadiusCard + 2, top = RadiusCard + 2, bottom = RadiusCard + 2 },
+                padding = new RectOffset { left = 12, right = 12, top = 10, bottom = 10 },
+                margin = new RectOffset { left = 0, right = 0, top = 0, bottom = 10 }
             };
             _cardStyle.normal.background = tex;
             return _cardStyle;
@@ -478,14 +480,14 @@ public static class Theme
         vThumb.normal.background = _scrollThumbTex;
         vThumb.hover.background = _scrollThumbTex;
         vThumb.active.background = _scrollThumbTex;
-        vThumb.border = new RectOffset(4, 4, 4, 4);
+        vThumb.border = new RectOffset { left = 4, right = 4, top = 4, bottom = 4 };
 
         var hThumb = GUI.skin.horizontalScrollbarThumb;
         hThumb.fixedHeight = 7;
         hThumb.normal.background = _scrollThumbTex;
         hThumb.hover.background = _scrollThumbTex;
         hThumb.active.background = _scrollThumbTex;
-        hThumb.border = new RectOffset(4, 4, 4, 4);
+        hThumb.border = new RectOffset { left = 4, right = 4, top = 4, bottom = 4 };
 
         GUI.skin.verticalScrollbar.fixedWidth = 7;
         GUI.skin.horizontalScrollbar.fixedHeight = 7;
@@ -500,10 +502,10 @@ public static class Theme
         GUI.skin.horizontalScrollbarRightButton.fixedHeight = 0;
 
         var slider = GUI.skin.horizontalSlider;
-        slider.normal.background = Slice(GetRounded(3), 4);
-        slider.hover.background = Slice(GetRounded(3), 4);
-        slider.active.background = Slice(GetRounded(3), 4);
-        slider.border = new RectOffset(4, 4, 4, 4);
+        slider.normal.background = _sliderTrackTex;
+        slider.hover.background = _sliderTrackTex;
+        slider.active.background = _sliderTrackTex;
+        slider.border = new RectOffset { left = 5, right = 5, top = 5, bottom = 5 };
         slider.fixedHeight = 5;
 
         var sliderThumb = GUI.skin.horizontalSliderThumb;
