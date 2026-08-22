@@ -15,6 +15,7 @@ public class BackdropBlur : MonoBehaviour
     private static int _lastScreenHeight;
 
     public static bool HasFrame => _latest != null && Time.unscaledTime - _lastHookFrameTime < 0.5f;
+    public static bool CanDisplay => HasFrame && _regionMode < 2;
     public static bool Active => MenuUI.isGUIActive && !PanaM.isPanicked && Theme.BlurEnabled;
     public static BackdropBlur Instance => _instance;
 
@@ -156,20 +157,53 @@ public class BackdropBlur : MonoBehaviour
         _latest = null;
     }
 
+    private static int _regionMode;
+
+    // 0 = GUI.DrawTextureWithTexCoords, 1 = BeginGroup + GUI.DrawTexture, 2 = disabled (simulated frost)
     public static void DrawRegion(Rect rect)
     {
-        if (_latest == null) return;
+        if (_latest == null || _regionMode >= 2) return;
 
         float sw = Screen.width;
         float sh = Screen.height;
 
-        var uv = new Rect(
-            rect.x / sw,
-            1f - (rect.y + rect.height) / sh,
-            rect.width / sw,
-            rect.height / sh);
+        try
+        {
+            if (_regionMode == 0)
+            {
+                var uv = new Rect(
+                    rect.x / sw,
+                    1f - (rect.y + rect.height) / sh,
+                    rect.width / sw,
+                    rect.height / sh);
 
-        GUI.DrawTextureWithTexCoords(rect, _latest, uv, true);
+                GUI.DrawTextureWithTexCoords(rect, _latest, uv, true);
+            }
+            else
+            {
+                GUI.BeginGroup(rect);
+                try
+                {
+                    GUI.DrawTexture(new Rect(-rect.x, -rect.y, sw, sh), _latest);
+                }
+                finally
+                {
+                    GUI.EndGroup();
+                }
+            }
+        }
+        catch
+        {
+            if (_regionMode == 1)
+            {
+                PanaM.Log.LogWarning("Backdrop blur display unsupported in this game build; using simulated frost");
+                _regionMode = 2;
+            }
+            else
+            {
+                _regionMode = 1;
+            }
+        }
     }
 }
 

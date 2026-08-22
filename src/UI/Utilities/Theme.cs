@@ -394,9 +394,10 @@ public static class Theme
 
     public static void DrawRect(Rect rect, Color color)
     {
+        EnsureCore();
         var old = GUI.color;
         GUI.color = color;
-        GUI.DrawTexture(rect, WhiteTexture);
+        GUI.Box(rect, GUIContent.none, Slice(_white, 0));
         GUI.color = old;
     }
 
@@ -409,7 +410,7 @@ public static class Theme
 
         var old = GUI.color;
         GUI.color = color;
-        GUI.DrawTexture(rect, _circleTex);
+        GUI.Box(rect, GUIContent.none, Slice(_circleTex, 0));
         GUI.color = old;
     }
 
@@ -436,7 +437,7 @@ public static class Theme
         EnsureCore();
         DrawShadow(rect);
 
-        if (BlurEnabled && BackdropBlur.HasFrame)
+        if (BlurEnabled && BackdropBlur.CanDisplay)
         {
             BackdropBlur.DrawRegion(rect);
         }
