@@ -10,32 +10,28 @@ public class ChatTab : ITab
     {
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
-        DrawGeneral();
+        Widgets.BeginSection("General");
 
-        GUILayout.Space(15);
+        CheatToggles.enableChat = Widgets.Toggle(CheatToggles.enableChat, "Enable Chat");
 
-        DrawTextbox();
+        CheatToggles.bypassUrlBlock = Widgets.Toggle(CheatToggles.bypassUrlBlock, "Bypass URL Block");
+
+        CheatToggles.lowerRateLimits = Widgets.Toggle(CheatToggles.lowerRateLimits, "Lower Rate Limits");
+
+        Widgets.EndSection();
+
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Textbox");
+
+        CheatToggles.unlockCharacters = Widgets.Toggle(CheatToggles.unlockCharacters, "Unlock Extra Characters");
+
+        CheatToggles.longerMessages = Widgets.Toggle(CheatToggles.longerMessages, "Allow Longer Messages");
+
+        CheatToggles.unlockClipboard = Widgets.Toggle(CheatToggles.unlockClipboard, "Unlock Clipboard");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
-    }
-
-    private void DrawGeneral()
-    {
-        CheatToggles.enableChat = GUILayout.Toggle(CheatToggles.enableChat, " Enable Chat");
-
-        CheatToggles.bypassUrlBlock = GUILayout.Toggle(CheatToggles.bypassUrlBlock, " Bypass URL Block");
-
-        CheatToggles.lowerRateLimits = GUILayout.Toggle(CheatToggles.lowerRateLimits, " Lower Rate Limits");
-    }
-
-    private void DrawTextbox()
-    {
-        GUILayout.Label("Textbox", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.unlockCharacters = GUILayout.Toggle(CheatToggles.unlockCharacters, " Unlock Extra Characters");
-
-        CheatToggles.longerMessages = GUILayout.Toggle(CheatToggles.longerMessages, " Allow Longer Messages");
-
-        CheatToggles.unlockClipboard = GUILayout.Toggle(CheatToggles.unlockClipboard, " Unlock Clipboard");
     }
 }

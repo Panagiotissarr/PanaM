@@ -28,15 +28,25 @@ public class DoorsUI : MonoBehaviour
         if (!CheatToggles.showDoorsMenu || !(MenuUI.isGUIActive || PanaM.menuKeepSubwindowsOpen.Value) || PanaM.isPanicked) return;
 
         UIHelpers.ApplyUIColor();
+        Theme.ApplySkinTheme();
 
-        _windowRect = GUI.Window((int)WindowId.DoorsUI, _windowRect, (GUI.WindowFunction)DoorsWindow, "Doors");
+        _windowRect = GUI.Window((int)WindowId.DoorsUI, _windowRect, (GUI.WindowFunction)DoorsWindow,
+            GUIContent.none, Theme.InvisibleWindowStyle);
     }
 
     private void DoorsWindow(int windowID)
     {
+        var rect = new Rect(0, 0, _windowRect.width, _windowRect.height);
+
+        Theme.DrawWindowChrome(rect);
+
+        GUI.Label(new Rect(16, 10, rect.width - 32, 20), "DOORS", Theme.SectionStyle);
+
+        GUILayout.Space(34);
+
         if (!Utils.isShip)
         {
-            GUI.DragWindow();
+            GUI.DragWindow(new Rect(0, 0, rect.width, rect.height));
             return;
         }
 
@@ -44,9 +54,12 @@ public class DoorsUI : MonoBehaviour
 
         if (map is MapNames.MiraHQ)
         {
-            GUI.DragWindow();
+            GUI.DragWindow(new Rect(0, 0, rect.width, rect.height));
             return;
         }
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(12);
 
         GUILayout.BeginVertical();
 
@@ -62,14 +75,14 @@ public class DoorsUI : MonoBehaviour
 
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("Close", GUIStylePreset.NormalButton, GUILayout.Width(50f)))
+            if (Widgets.Button("Close", GUILayout.Width(56), GUILayout.Height(22)))
             {
                 DoorsHandler.CloseDoorsInRoom(doorRoom);
             }
 
             if (map is MapNames.Polus or MapNames.Airship or MapNames.Fungle)
             {
-                if (GUILayout.Button("Open", GUIStylePreset.NormalButton, GUILayout.Width(50f)))
+                if (Widgets.Button("Open", GUILayout.Width(56), GUILayout.Height(22)))
                 {
                     DoorsHandler.OpenDoorsInRoom(doorRoom);
                 }
@@ -78,7 +91,7 @@ public class DoorsUI : MonoBehaviour
             if (Utils.isHost)
             {
                 var spamClose = _doorsToSpamClose.Contains(doorRoom);
-                spamClose = GUILayout.Toggle(spamClose, "Spam Close", GUIStylePreset.NormalToggle);
+                spamClose = Widgets.Toggle(spamClose, "S.Close");
 
                 if (spamClose && !_doorsToSpamClose.Contains(doorRoom))
                 {
@@ -92,7 +105,7 @@ public class DoorsUI : MonoBehaviour
                 if (map is MapNames.Polus or MapNames.Airship or MapNames.Fungle)
                 {
                     var spamOpen = _doorsToSpamOpen.Contains(doorRoom);
-                    spamOpen = GUILayout.Toggle(spamOpen, "Spam Open", GUIStylePreset.NormalToggle);
+                    spamOpen = Widgets.Toggle(spamOpen, "S.Open");
 
                     if (spamOpen && !_doorsToSpamOpen.Contains(doorRoom))
                     {
@@ -121,19 +134,20 @@ public class DoorsUI : MonoBehaviour
 
         GUILayout.FlexibleSpace();
 
-        GUILayout.Box("", GUIStylePreset.Separator, GUILayout.Height(1f), GUILayout.ExpandWidth(true));
-        GUILayout.Space(1f);
+        Widgets.Divider();
+
+        GUILayout.Space(8);
 
         GUILayout.BeginHorizontal();
 
-        if (GUILayout.Button("Close All", GUIStylePreset.NormalButton))
+        if (Widgets.Button("Close All", GUILayout.Height(26)))
         {
             CheatToggles.closeAllDoors = true;
         }
 
         if (map is MapNames.Polus or MapNames.Airship or MapNames.Fungle)
         {
-            if (GUILayout.Button("Open All", GUIStylePreset.NormalButton))
+            if (Widgets.Button("Open All", GUILayout.Height(26)))
             {
                 CheatToggles.openAllDoors = true;
             }
@@ -143,11 +157,11 @@ public class DoorsUI : MonoBehaviour
 
         if (Utils.isHost)
         {
-            CheatToggles.spamCloseAllDoors = GUILayout.Toggle(CheatToggles.spamCloseAllDoors, "Spam Close All", GUIStylePreset.NormalToggle);
+            CheatToggles.spamCloseAllDoors = Widgets.Toggle(CheatToggles.spamCloseAllDoors, "Spam Close All");
 
             if (map is MapNames.Polus or MapNames.Airship or MapNames.Fungle)
             {
-                CheatToggles.spamOpenAllDoors = GUILayout.Toggle(CheatToggles.spamOpenAllDoors, "Spam Open All", GUIStylePreset.NormalToggle);
+                CheatToggles.spamOpenAllDoors = Widgets.Toggle(CheatToggles.spamOpenAllDoors, "Spam Open All");
             }
         }
         else
@@ -159,7 +173,12 @@ public class DoorsUI : MonoBehaviour
 
         GUILayout.EndVertical();
 
-        GUI.DragWindow();
+        GUILayout.Space(12);
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
+
+        GUI.DragWindow(new Rect(0, 0, rect.width, 26));
     }
 
     public void Update()

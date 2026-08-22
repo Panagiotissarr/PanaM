@@ -10,17 +10,16 @@ public class ModesTab : ITab
     {
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
-        DrawGeneral();
+        Widgets.BeginSection("General");
+
+        CheatToggles.rgbMode = Widgets.Toggle(CheatToggles.rgbMode, "RGB Mode");
+
+        CheatToggles.stealthMode = Widgets.Toggle(CheatToggles.stealthMode, "Stealth Mode");
+
+        CheatToggles.panicMode = Widgets.Toggle(CheatToggles.panicMode, "Panic Mode");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
-    }
-
-    private void DrawGeneral()
-    {
-        CheatToggles.rgbMode = GUILayout.Toggle(CheatToggles.rgbMode, " RGB Mode");
-
-        CheatToggles.stealthMode = GUILayout.Toggle(CheatToggles.stealthMode, " Stealth Mode");
-
-        CheatToggles.panicMode = GUILayout.Toggle(CheatToggles.panicMode, " Panic Mode");
     }
 }

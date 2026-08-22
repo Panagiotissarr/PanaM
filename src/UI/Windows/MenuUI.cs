@@ -1,20 +1,20 @@
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
-using System.Reflection;
 
 namespace PanaM;
 
 public class MenuUI : MonoBehaviour
 {
-    public static int windowHeight = 550;
-    public static int windowWidth = 700;
+    public static int windowHeight = 560;
+    public static int windowWidth = 720;
     private Rect _windowRect;
 
     public static bool isGUIActive = false;
     private List<ITab> _tabs = new();
     private int _selectedTab;
     public static float hue; // For RGB mode
+    private Vector2 _contentScroll;
 
     #region Search Bar Data Structures
     private struct ToggleInfo
@@ -34,7 +34,10 @@ public class MenuUI : MonoBehaviour
     private List<ToggleInfo> _allToggles = new();
     private string _searchQuery = "";
     private bool _searchBarFocused = false;
+    private Rect _searchFieldRect;
     #endregion
+
+    private const int NavWidth = 128;
 
     private void InitializeIfNeeded()
     {
@@ -73,11 +76,6 @@ public class MenuUI : MonoBehaviour
             windowWidth,
             windowHeight
         );
-    }
-
-    public void InitStyles()
-    {
-        GUI.skin.toggle.fontSize = GUI.skin.button.fontSize = GUI.skin.label.fontSize = 15;
     }
 
     private void Update()
@@ -219,164 +217,279 @@ public class MenuUI : MonoBehaviour
     {
         if (!isGUIActive || PanaM.isPanicked) return;
 
-        InitStyles();
-
         UIHelpers.ApplyUIColor();
 
-        _windowRect = GUI.Window((int)WindowId.MenuUI, _windowRect, (GUI.WindowFunction)WindowFunction, "PanaM v" + PanaM.panamVersion);
+        Theme.ApplySkinTheme();
+
+        _windowRect = GUI.Window((int)WindowId.MenuUI, _windowRect, (GUI.WindowFunction)WindowFunction,
+            GUIContent.none, Theme.InvisibleWindowStyle);
     }
 
     public void WindowFunction(int windowID)
     {
         InitializeIfNeeded();
 
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("Search:", GUILayout.Width(60));
-
-        string displayText = string.IsNullOrEmpty(_searchQuery) ? "Type here..." : _searchQuery;
-        if (_searchBarFocused)
-        {
-            displayText = _searchQuery + (System.DateTime.Now.Millisecond / 500 % 2 == 0 ? "|" : "");
-        }
-
-        GUIStyle searchBoxStyle = new GUIStyle(GUI.skin.box);
-        if (_searchBarFocused)
-        {
-            searchBoxStyle.normal.textColor = Color.white;
-        }
-        else
-        {
-            searchBoxStyle.normal.textColor = Color.gray;
-        }
-
-        if (GUILayout.Button(displayText, searchBoxStyle, GUILayout.ExpandWidth(true), GUILayout.Height(25)))
-        {
-            _searchBarFocused = true;
-        }
-        Rect searchRect = GUILayoutUtility.GetLastRect();
-
-        if (GUILayout.Button("Clear", GUILayout.Width(60)))
-        {
-            _searchQuery = "";
-            _searchBarFocused = false;
-        }
-        GUILayout.EndHorizontal();
-
+        var windowRect = new Rect(0, 0, _windowRect.width, _windowRect.height);
         Event e = Event.current;
-        if (e != null)
-        {
-            if (e.type == EventType.MouseDown)
-            {
-                if (!searchRect.Contains(e.mousePosition))
-                {
-                    _searchBarFocused = false;
-                }
-            }
-            else if (_searchBarFocused && e.type == EventType.KeyDown)
-            {
-                if (e.keyCode == KeyCode.Backspace)
-                {
-                    if (_searchQuery.Length > 0)
-                    {
-                        _searchQuery = _searchQuery.Substring(0, _searchQuery.Length - 1);
-                    }
-                    e.Use();
-                }
-                else if (e.keyCode == KeyCode.Escape || e.keyCode == KeyCode.Return)
-                {
-                    _searchBarFocused = false;
-                    e.Use();
-                }
-                else if (e.character != '\0' && e.character != '\n' && e.character != '\r' && e.character != '\t' && e.character != '\b')
-                {
-                    _searchQuery += e.character;
-                    e.Use();
-                }
-            }
-        }
+
+        Theme.DrawWindowChrome(windowRect);
+
+        DrawTitleBar(e);
+
+        GUILayout.Space(Theme.TitleBarHeight - 4);
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(14);
+        DrawSearchField(e);
+        GUILayout.Space(14);
+        GUILayout.EndHorizontal();
 
         GUILayout.Space(10);
 
-        List<ITab> visibleTabs = new();
-        if (string.IsNullOrWhiteSpace(_searchQuery))
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(14);
+
+        List<ITab> visibleTabs = ComputeVisibleTabs();
+
+        ITab activeTab = ResolveActiveTab(visibleTabs);
+
+        DrawSidebar(visibleTabs, activeTab);
+
+        GUILayout.Space(12);
+
+        var dividerRect = GUILayoutUtility.GetRect(1, 1, GUILayout.Width(1), GUILayout.ExpandHeight(true));
+        Theme.DrawRect(dividerRect, Theme.DividerColor);
+
+        GUILayout.Space(12);
+
+        DrawContent(activeTab, visibleTabs, e);
+
+        GUILayout.Space(14);
+        GUILayout.EndHorizontal();
+
+        GUI.DragWindow(new Rect(0, 0, windowWidth, Theme.TitleBarHeight));
+    }
+
+    private void DrawTitleBar(Event e)
+    {
+        float w = _windowRect.width;
+
+        GUI.Label(new Rect(18, 9, 140, 26), "PanaM", Theme.TitleStyle);
+        Theme.DrawCircle(new Rect(92, 18, 8, 8), Theme.Accent);
+
+        string versionStr = "v" + PanaM.panamVersion;
+        var badgeRect = new Rect(w - 74, 12, 58, 18);
+        Theme.DrawRounded(badgeRect, 9, Theme.AccentSoft);
+
+        var badgeStyle = Theme.MutedStyle;
+        badgeStyle.alignment = TextAnchor.MiddleCenter;
+        badgeStyle.normal.textColor = Color.Lerp(Theme.Accent, Color.white, 0.6f);
+        GUI.Label(badgeRect, versionStr, badgeStyle);
+        badgeStyle.alignment = TextAnchor.MiddleLeft;
+        badgeStyle.normal.textColor = Theme.TextMuted;
+    }
+
+    private void DrawSearchField(Event e)
+    {
+        var fieldRect = GUILayoutUtility.GetRect(0, Theme.SearchFieldHeight, GUILayout.ExpandWidth(true));
+        _searchFieldRect = fieldRect;
+
+        bool focused = _searchBarFocused;
+
+        if (focused)
         {
-            visibleTabs = _tabs;
+            Theme.DrawRounded(fieldRect, 9, new Color(Theme.Accent.r, Theme.Accent.g, Theme.Accent.b, 0.55f));
+            Theme.DrawRounded(new Rect(fieldRect.x + 1, fieldRect.y + 1, fieldRect.width - 2, fieldRect.height - 2),
+                8, new Color(1f, 1f, 1f, 0.08f));
         }
         else
         {
-            var query = _searchQuery.Trim();
-            foreach (var tab in _tabs)
+            Theme.DrawRounded(fieldRect, 9, new Color(1f, 1f, 1f, 0.05f));
+        }
+
+        string displayText;
+        if (focused)
+        {
+            displayText = _searchQuery + (System.DateTime.Now.Millisecond / 500 % 2 == 0 ? "|" : "");
+        }
+        else if (string.IsNullOrEmpty(_searchQuery))
+        {
+            displayText = "Search cheats...";
+        }
+        else
+        {
+            displayText = _searchQuery;
+        }
+
+        var textStyle = Theme.BodyStyle;
+        textStyle.normal.textColor = focused ? Theme.TextPrimary :
+            string.IsNullOrEmpty(_searchQuery) ? Theme.TextMuted : Theme.TextSecondary;
+
+        float clearWidth = string.IsNullOrEmpty(_searchQuery) ? 0 : 24;
+        var textRect = new Rect(fieldRect.x + 12, fieldRect.y + 4, fieldRect.width - clearWidth - 20, fieldRect.height - 8);
+        GUI.Label(textRect, displayText, textStyle);
+
+        if (clearWidth > 0)
+        {
+            var clearRect = new Rect(fieldRect.xMax - clearWidth - 4, fieldRect.y + (fieldRect.height - 20) / 2f, 20, 20);
+            if (clearRect.Contains(e.mousePosition))
             {
-                bool hasMatch = false;
-                foreach (var toggle in _allToggles)
-                {
-                    if (toggle.tabName.Equals(tab.name, System.StringComparison.OrdinalIgnoreCase) &&
-                        toggle.label.IndexOf(query, System.StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        hasMatch = true;
-                        break;
-                    }
-                }
-                if (hasMatch)
-                {
-                    visibleTabs.Add(tab);
-                }
+                Theme.DrawRounded(clearRect, 6, Theme.SurfaceHover);
+            }
+
+            var xStyle = Theme.MutedStyle;
+            xStyle.alignment = TextAnchor.MiddleCenter;
+            GUI.Label(clearRect, "\u2715", xStyle);
+            xStyle.alignment = TextAnchor.MiddleLeft;
+
+            if (e.type == EventType.MouseDown && e.button == 0 && clearRect.Contains(e.mousePosition))
+            {
+                _searchQuery = "";
+                _searchBarFocused = false;
+                e.Use();
             }
         }
 
-        ITab activeTab = null;
-        if (visibleTabs.Count > 0)
+        if (e.type == EventType.MouseDown && e.button == 0)
         {
-            if (_selectedTab >= 0 && _selectedTab < _tabs.Count)
+            if (fieldRect.Contains(e.mousePosition))
             {
-                var curTab = _tabs[_selectedTab];
-                if (visibleTabs.Contains(curTab))
-                {
-                    activeTab = curTab;
-                }
-                else
-                {
-                    activeTab = visibleTabs[0];
-                    _selectedTab = _tabs.IndexOf(activeTab);
-                }
+                _searchBarFocused = true;
+                e.Use();
             }
             else
             {
-                activeTab = visibleTabs[0];
-                _selectedTab = _tabs.IndexOf(activeTab);
+                _searchBarFocused = false;
             }
         }
 
-        GUILayout.BeginHorizontal();
+        if (!_searchBarFocused) return;
 
-        GUILayout.BeginVertical(GUILayout.Width(windowWidth * 0.15f));
-        for (var i = 0; i < visibleTabs.Count; i++)
+        if (e.type == EventType.KeyDown)
         {
-            Color standardColor = GUI.backgroundColor;
-
-            if (activeTab == visibleTabs[i])
+            if (e.keyCode == KeyCode.Backspace)
             {
-                GUI.backgroundColor = new Color(0.2f, 0.2f, 0.2f);
+                if (_searchQuery.Length > 0)
+                {
+                    _searchQuery = _searchQuery.Substring(0, _searchQuery.Length - 1);
+                }
+                e.Use();
             }
-
-            if (GUILayout.Button(visibleTabs[i].name, GUIStylePreset.TabButton, GUILayout.Height(35)))
+            else if (e.keyCode == KeyCode.Escape || e.keyCode == KeyCode.Return)
             {
-                activeTab = visibleTabs[i];
-                _selectedTab = _tabs.IndexOf(activeTab);
+                _searchBarFocused = false;
+                e.Use();
             }
-
-            GUI.backgroundColor = standardColor;
+            else if (e.character != '\0' && e.character != '\n' && e.character != '\r' && e.character != '\t' && e.character != '\b')
+            {
+                _searchQuery += e.character;
+                e.Use();
+            }
         }
+    }
+
+    private bool TabHasMatches(string tabName, string query)
+    {
+        foreach (var toggle in _allToggles)
+        {
+            if (toggle.tabName.Equals(tabName, System.StringComparison.OrdinalIgnoreCase) &&
+                toggle.label.IndexOf(query, System.StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private List<ITab> ComputeVisibleTabs()
+    {
+        if (string.IsNullOrWhiteSpace(_searchQuery)) return _tabs;
+
+        var query = _searchQuery.Trim();
+        var result = new List<ITab>();
+
+        foreach (var tab in _tabs)
+        {
+            if (TabHasMatches(tab.name, query))
+            {
+                result.Add(tab);
+            }
+        }
+
+        return result;
+    }
+
+    private ITab ResolveActiveTab(List<ITab> visibleTabs)
+    {
+        if (visibleTabs.Count == 0) return null;
+
+        if (_selectedTab >= 0 && _selectedTab < _tabs.Count)
+        {
+            var curTab = _tabs[_selectedTab];
+            if (visibleTabs.Contains(curTab)) return curTab;
+        }
+
+        var fallback = visibleTabs[0];
+        _selectedTab = _tabs.IndexOf(fallback);
+        return fallback;
+    }
+
+    private void DrawSidebar(List<ITab> visibleTabs, ITab activeTab)
+    {
+        GUILayout.BeginVertical(GUILayout.Width(NavWidth));
+
+        foreach (var tab in visibleTabs)
+        {
+            bool selected = tab == activeTab;
+            var itemRect = GUILayoutUtility.GetRect(NavWidth - 6, 30, GUILayout.ExpandWidth(false));
+
+            var e = Event.current;
+            bool hover = !selected && itemRect.Contains(e.mousePosition);
+
+            if (selected)
+            {
+                Theme.DrawRounded(itemRect, 7, Theme.AccentSoft);
+                var barRect = new Rect(itemRect.x, itemRect.y + 8, 3, itemRect.height - 16);
+                Theme.DrawRect(barRect, Theme.Accent);
+            }
+            else if (hover)
+            {
+                Theme.DrawRounded(itemRect, 7, Theme.SurfaceIdle);
+            }
+
+            var labelStyle = Theme.BodyStyle;
+            labelStyle.fontSize = 13;
+            labelStyle.normal.textColor = selected ? Color.white : hover ? Theme.TextPrimary : Theme.TextSecondary;
+            GUI.Label(new Rect(itemRect.x + 12, itemRect.y + 4, itemRect.width - 16, itemRect.height - 8),
+                tab.name, labelStyle);
+            labelStyle.fontSize = 14;
+            labelStyle.normal.textColor = Theme.TextPrimary;
+
+            if (e.type == EventType.MouseDown && e.button == 0 && itemRect.Contains(e.mousePosition))
+            {
+                _selectedTab = _tabs.IndexOf(tab);
+                _searchBarFocused = false;
+                _contentScroll = Vector2.zero;
+                e.Use();
+            }
+        }
+
+        GUILayout.FlexibleSpace();
         GUILayout.EndVertical();
+    }
 
-        GUILayout.Box("", GUIStylePreset.Separator, GUILayout.Width(1f), GUILayout.ExpandHeight(true));
-        GUILayout.Space(10f);
-
-        GUILayout.BeginVertical(GUILayout.Width(windowWidth * 0.85f));
+    private void DrawContent(ITab activeTab, List<ITab> visibleTabs, Event e)
+    {
+        GUILayout.BeginVertical();
 
         if (activeTab != null)
         {
-            GUILayout.Label(activeTab.name, GUIStylePreset.TabTitle);
+            GUI.Label(GUILayoutUtility.GetRect(0, 26, GUILayout.ExpandWidth(true)), activeTab.name.ToUpperInvariant(), Theme.SectionStyle);
+            GUILayout.Space(2);
+
+            _contentScroll = GUILayout.BeginScrollView(_contentScroll, false, true,
+                GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
 
             if (string.IsNullOrWhiteSpace(_searchQuery))
             {
@@ -385,24 +498,52 @@ public class MenuUI : MonoBehaviour
             else
             {
                 var query = _searchQuery.Trim();
-                GUILayout.BeginVertical();
-                foreach (var toggle in _allToggles)
+
+                foreach (var tab in visibleTabs)
                 {
-                    if (toggle.tabName.Equals(activeTab.name, System.StringComparison.OrdinalIgnoreCase) &&
-                        toggle.label.IndexOf(query, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                    var headerRect = GUILayoutUtility.GetRect(0, 24, GUILayout.ExpandWidth(true));
+                    bool hover = headerRect.Contains(e.mousePosition);
+                    if (hover) Theme.DrawRounded(headerRect, 6, Theme.SurfaceIdle);
+
+                    var headerStyle = Theme.BodyStyle;
+                    headerStyle.fontStyle = FontStyle.Bold;
+                    headerStyle.normal.textColor = hover ? Theme.Accent : Color.Lerp(Theme.Accent, Color.white, 0.4f);
+                    GUI.Label(new Rect(headerRect.x, headerRect.y + 2, headerRect.width, headerRect.height),
+                        tab.name, headerStyle);
+                    headerStyle.fontStyle = FontStyle.Normal;
+                    headerStyle.normal.textColor = Theme.TextPrimary;
+
+                    if (e.type == EventType.MouseDown && e.button == 0 && headerRect.Contains(e.mousePosition))
                     {
-                        DrawSearchToggle(toggle.fieldName, toggle.label);
+                        _selectedTab = _tabs.IndexOf(tab);
+                        _searchQuery = "";
+                        _searchBarFocused = false;
+                        _contentScroll = Vector2.zero;
+                        e.Use();
                     }
+
+                    foreach (var toggle in _allToggles)
+                    {
+                        if (toggle.tabName.Equals(tab.name, System.StringComparison.OrdinalIgnoreCase) &&
+                            toggle.label.IndexOf(query, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            DrawSearchToggle(toggle.fieldName, toggle.label);
+                        }
+                    }
+
+                    GUILayout.Space(6);
                 }
-                GUILayout.EndVertical();
             }
+
+            GUILayout.EndScrollView();
+        }
+        else
+        {
+            GUILayout.Label("No matching cheats", Theme.MutedStyle);
+            GUILayout.FlexibleSpace();
         }
 
         GUILayout.EndVertical();
-
-        GUILayout.EndHorizontal();
-
-        GUI.DragWindow(new Rect(0, 0, windowWidth, 25));
     }
 
     #region Search Bar Helpers
@@ -411,7 +552,7 @@ public class MenuUI : MonoBehaviour
         if (CheatToggles.ToggleFields.TryGetValue(fieldName, out var field))
         {
             bool val = (bool)field.GetValue(null);
-            bool newVal = GUILayout.Toggle(val, " " + label);
+            bool newVal = Widgets.Toggle(val, label);
             if (newVal != val)
             {
                 field.SetValue(null, newVal);

@@ -10,19 +10,18 @@ public class ConsoleTab : ITab
     {
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
-        DrawGeneral();
+        Widgets.BeginSection("General");
+
+        CheatToggles.showConsole = Widgets.Toggle(CheatToggles.showConsole, "Show Console");
+
+        CheatToggles.logDeaths = Widgets.Toggle(CheatToggles.logDeaths, "Log Deaths");
+
+        CheatToggles.logShapeshifts = Widgets.Toggle(CheatToggles.logShapeshifts, "Log Shapeshifts");
+
+        CheatToggles.logVents = Widgets.Toggle(CheatToggles.logVents, "Log Vents");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
-    }
-
-    private void DrawGeneral()
-    {
-        CheatToggles.showConsole = GUILayout.Toggle(CheatToggles.showConsole, " Show Console");
-
-        CheatToggles.logDeaths = GUILayout.Toggle(CheatToggles.logDeaths, " Log Deaths");
-
-        CheatToggles.logShapeshifts = GUILayout.Toggle(CheatToggles.logShapeshifts, " Log Shapeshifts");
-
-        CheatToggles.logVents = GUILayout.Toggle(CheatToggles.logVents, " Log Vents");
     }
 }

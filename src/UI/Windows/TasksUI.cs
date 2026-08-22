@@ -29,19 +29,35 @@ public class TasksUI : MonoBehaviour
     {
         if (!CheatToggles.showTasksMenu || !(MenuUI.isGUIActive || PanaM.menuKeepSubwindowsOpen.Value) || PanaM.isPanicked) return;
 
-        _playerHeaderStyle ??= new GUIStyle(GUI.skin.button)
+        if (_playerHeaderStyle == null)
         {
-            fontSize = 18,
-            alignment = TextAnchor.MiddleLeft
-        };
+            _playerHeaderStyle = new GUIStyle(Theme.ButtonStyle)
+            {
+                fontSize = 15,
+                alignment = TextAnchor.MiddleLeft
+            };
+        }
 
         UIHelpers.ApplyUIColor();
+        Theme.ApplySkinTheme();
 
-        _windowRect = GUI.Window((int)WindowId.TasksUI, _windowRect, (GUI.WindowFunction)TasksWindow, "Tasks");
+        _windowRect = GUI.Window((int)WindowId.TasksUI, _windowRect, (GUI.WindowFunction)TasksWindow,
+            GUIContent.none, Theme.InvisibleWindowStyle);
     }
 
     private void TasksWindow(int windowID)
     {
+        var rect = new Rect(0, 0, _windowRect.width, _windowRect.height);
+
+        Theme.DrawWindowChrome(rect);
+
+        GUI.Label(new Rect(16, 10, rect.width - 32, 20), "TASKS", Theme.SectionStyle);
+
+        GUILayout.Space(34);
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(12);
+
         GUILayout.BeginVertical();
 
         _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
@@ -91,7 +107,6 @@ public class TasksUI : MonoBehaviour
 
                     _tasksString.Clear();
                     task.AppendTaskText(_tasksString);
-                    //_tasksString.Append($"Task Type: {task.TaskType.ToString()}");
                     var taskText = _tasksString.ToString();
 
                     if (taskText.Contains("You're dead") || taskText.Contains("Sabotage and kill")) continue;
@@ -102,13 +117,15 @@ public class TasksUI : MonoBehaviour
 
                     if (task.IsComplete)
                     {
-                        GUILayout.Label("<color=#00ff00>✔ Complete</color>");
+                        var doneStyle = Theme.MutedStyle;
+                        doneStyle.normal.textColor = Theme.SuccessColor;
+                        GUI.Label(GUILayoutUtility.GetRect(80, 18), "<color=#3FB950>✔ Complete</color>", doneStyle);
                     }
                     else
                     {
                         if (player == PlayerControl.LocalPlayer)
                         {
-                            if (GUILayout.Button("Complete", GUIStylePreset.NormalButton))
+                            if (Widgets.Button("Complete", GUILayout.Width(90), GUILayout.Height(22)))
                             {
                                 Utils.CompleteTask(task);
                             }
@@ -127,13 +144,20 @@ public class TasksUI : MonoBehaviour
 
         GUILayout.EndScrollView();
 
-        if (GUILayout.Button("Complete My Tasks", GUIStylePreset.NormalButton))
+        GUILayout.Space(6);
+
+        if (Widgets.AccentButton("Complete My Tasks", GUILayout.Height(28)))
         {
             CheatToggles.completeMyTasks = true;
         }
 
         GUILayout.EndVertical();
 
-        GUI.DragWindow();
+        GUILayout.Space(12);
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
+
+        GUI.DragWindow(new Rect(0, 0, rect.width, 26));
     }
 }

@@ -12,67 +12,58 @@ public class ShipTab : ITab
 
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
-        DrawGeneral();
+        Widgets.BeginSection("General");
 
-        GUILayout.Space(15);
+        CheatToggles.unfixableLights = Widgets.Toggle(CheatToggles.unfixableLights, "Unfixable Lights");
 
-        DrawSabotage();
+        CheatToggles.callMeeting = Widgets.Toggle(CheatToggles.callMeeting, "Call Meeting");
+
+        CheatToggles.closeMeeting = Widgets.Toggle(CheatToggles.closeMeeting, "Close Meeting");
+
+        CheatToggles.autoReportBodies = Widgets.Toggle(CheatToggles.autoReportBodies, "Auto-Report Dead Bodies");
+
+        CheatToggles.autoOpenDoorsOnUse = Widgets.Toggle(CheatToggles.autoOpenDoorsOnUse, "Auto-Open Doors On Use");
+
+        Widgets.EndSection();
+
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Sabotage");
+
+        CheatToggles.reactorSab = Widgets.Toggle(CheatToggles.reactorSab, "Reactor");
+
+        CheatToggles.oxygenSab = Widgets.Toggle(CheatToggles.oxygenSab, "Oxygen");
+
+        CheatToggles.elecSab = Widgets.Toggle(CheatToggles.elecSab, "Lights");
+
+        CheatToggles.commsSab = Widgets.Toggle(CheatToggles.commsSab, "Comms");
+
+        CheatToggles.showDoorsMenu = Widgets.Toggle(CheatToggles.showDoorsMenu, "Show Doors Menu");
+
+        CheatToggles.mushSab = Widgets.Toggle(CheatToggles.mushSab, "Mushroom Mixup");
+
+        CheatToggles.mushSpore = Widgets.Toggle(CheatToggles.mushSpore, "Trigger Spores");
+
+        CheatToggles.sabotageMap = Widgets.Toggle(CheatToggles.sabotageMap, "Open Sabotage Map");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
 
         GUILayout.BeginVertical();
 
-        DrawVents();
+        Widgets.BeginSection("Vents");
+
+        CheatToggles.unlockVents = Widgets.Toggle(CheatToggles.unlockVents, "Unlock Vents");
+
+        CheatToggles.kickVents = Widgets.Toggle(CheatToggles.kickVents, "Kick All From Vents");
+
+        CheatToggles.walkInVents = Widgets.Toggle(CheatToggles.walkInVents, "Walk In Vents");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
 
         GUILayout.EndHorizontal();
-    }
-
-    private void DrawGeneral()
-    {
-        CheatToggles.unfixableLights = GUILayout.Toggle(CheatToggles.unfixableLights, " Unfixable Lights");
-
-        // CheatToggles.reportBody = GUILayout.Toggle(CheatToggles.reportBody, " Report Body");
-
-        CheatToggles.callMeeting = GUILayout.Toggle(CheatToggles.callMeeting, " Call Meeting");
-
-        CheatToggles.closeMeeting = GUILayout.Toggle(CheatToggles.closeMeeting, " Close Meeting");
-
-        CheatToggles.autoReportBodies = GUILayout.Toggle(CheatToggles.autoReportBodies, " Auto-Report Dead Bodies");
-
-        CheatToggles.autoOpenDoorsOnUse = GUILayout.Toggle(CheatToggles.autoOpenDoorsOnUse, " Auto-Open Doors On Use");
-    }
-
-    private void DrawSabotage()
-    {
-        GUILayout.Label("Sabotage", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.reactorSab = GUILayout.Toggle(CheatToggles.reactorSab, " Reactor");
-
-        CheatToggles.oxygenSab = GUILayout.Toggle(CheatToggles.oxygenSab, " Oxygen");
-
-        CheatToggles.elecSab = GUILayout.Toggle(CheatToggles.elecSab, " Lights");
-
-        CheatToggles.commsSab = GUILayout.Toggle(CheatToggles.commsSab, " Comms");
-
-        CheatToggles.showDoorsMenu = GUILayout.Toggle(CheatToggles.showDoorsMenu, " Show Doors Menu");
-
-        CheatToggles.mushSab = GUILayout.Toggle(CheatToggles.mushSab, " Mushroom Mixup");
-
-        CheatToggles.mushSpore = GUILayout.Toggle(CheatToggles.mushSpore, " Trigger Spores");
-
-        CheatToggles.sabotageMap = GUILayout.Toggle(CheatToggles.sabotageMap, " Open Sabotage Map");
-    }
-
-    private void DrawVents()
-    {
-        GUILayout.Label("Vents", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.unlockVents = GUILayout.Toggle(CheatToggles.unlockVents, " Unlock Vents");
-
-        CheatToggles.kickVents = GUILayout.Toggle(CheatToggles.kickVents, " Kick All From Vents");
-
-        CheatToggles.walkInVents = GUILayout.Toggle(CheatToggles.walkInVents, " Walk In Vents");
     }
 }

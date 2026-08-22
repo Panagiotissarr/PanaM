@@ -4,7 +4,7 @@ namespace PanaM;
 
 public class RolesUI : MonoBehaviour
 {
-    public static int windowHeight = 100;
+    public static int windowHeight = 130;
     public static int windowWidth = 450;
     private Rect _windowRect;
 
@@ -26,12 +26,25 @@ public class RolesUI : MonoBehaviour
         if (!CheatToggles.showRolesMenu || !(MenuUI.isGUIActive || PanaM.menuKeepSubwindowsOpen.Value) || PanaM.isPanicked) return;
 
         UIHelpers.ApplyUIColor();
+        Theme.ApplySkinTheme();
 
-        _windowRect = GUI.Window((int)WindowId.RolesUI, _windowRect, (GUI.WindowFunction)RolesWindow, "Assign Roles");
+        _windowRect = GUI.Window((int)WindowId.RolesUI, _windowRect, (GUI.WindowFunction)RolesWindow,
+            GUIContent.none, Theme.InvisibleWindowStyle);
     }
 
     private void RolesWindow(int windowID)
     {
+        var rect = new Rect(0, 0, _windowRect.width, _windowRect.height);
+
+        Theme.DrawWindowChrome(rect);
+
+        GUI.Label(new Rect(16, 10, rect.width - 32, 20), "ASSIGN ROLES", Theme.SectionStyle);
+
+        GUILayout.Space(34);
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(12);
+
         GUILayout.BeginVertical();
 
         _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
@@ -47,11 +60,11 @@ public class RolesUI : MonoBehaviour
             GUILayout.Label($"{CheatToggles.forcedRole}");
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("Reset", GUILayout.Width(80f)))
+            if (Widgets.Button("Reset", GUILayout.Width(70f), GUILayout.Height(24f)))
             {
                 CheatToggles.forcedRole = null;
             }
-            if (GUILayout.Button("Assign", GUILayout.Width(80f)))
+            if (Widgets.AccentButton("Assign", GUILayout.Width(70f), GUILayout.Height(24f)))
             {
                 CheatToggles.forceRole = true;
             }
@@ -61,8 +74,14 @@ public class RolesUI : MonoBehaviour
         }
 
         GUILayout.EndScrollView();
+
+        Widgets.MutedLabel("Roles will be assigned on next game start");
+
         GUILayout.EndVertical();
-        GUILayout.Label("Roles will be assigned on next game start");
-        GUI.DragWindow();
+
+        GUILayout.Space(12);
+        GUILayout.EndHorizontal();
+
+        GUI.DragWindow(new Rect(0, 0, rect.width, 26));
     }
 }

@@ -2,69 +2,20 @@ using UnityEngine;
 
 namespace PanaM;
 
+// Legacy style presets kept for compatibility with remaining call sites.
+// All presets now resolve onto the modern Theme styles.
 public static class GUIStylePreset
 {
     private static GUIStyle _separator;
     private static GUIStyle _darkSeparator;
-    private static GUIStyle _normalButton;
     private static GUIStyle _normalToggle;
     private static GUIStyle _tabButton;
-    private static GUIStyle _tabTitle;
-    private static GUIStyle _tabSubtitle;
 
-    public static GUIStyle Separator
-    {
-        get
-        {
-            if (_separator == null)
-            {
-                _separator = new GUIStyle(GUI.skin.box)
-                {
-                    normal = { background = Texture2D.whiteTexture },
-                    margin = new RectOffset { top = 4, bottom = 4 },
-                    padding = new RectOffset(),
-                    border = new RectOffset()
-                };
-            }
+    public static GUIStyle Separator => _separator ??= MakeDivider(Theme.DividerColor);
 
-            return _separator;
-        }
-    }
+    public static GUIStyle DarkSeparator => _darkSeparator ??= MakeDivider(new Color(1f, 1f, 1f, 0.10f));
 
-    public static GUIStyle DarkSeparator
-    {
-        get
-        {
-            if (_darkSeparator == null)
-            {
-                _darkSeparator = new GUIStyle(GUI.skin.box)
-                {
-                    normal = { background = Texture2D.grayTexture },
-                    margin = new RectOffset { top = 4, bottom = 4 },
-                    padding = new RectOffset(),
-                    border = new RectOffset()
-                };
-            }
-
-            return _darkSeparator;
-        }
-    }
-
-    public static GUIStyle NormalButton
-    {
-        get
-        {
-            if (_normalButton == null)
-            {
-                _normalButton = new GUIStyle(GUI.skin.button)
-                {
-                    fontSize = 13
-                };
-            }
-
-            return _normalButton;
-        }
-    }
+    public static GUIStyle NormalButton => Theme.ButtonStyle;
 
     public static GUIStyle NormalToggle
     {
@@ -74,8 +25,11 @@ public static class GUIStylePreset
             {
                 _normalToggle = new GUIStyle(GUI.skin.toggle)
                 {
-                    fontSize = 13
+                    fontSize = 13,
+                    fontStyle = FontStyle.Normal
                 };
+                _normalToggle.normal.textColor = Theme.TextPrimary;
+                _normalToggle.hover.textColor = Color.white;
             }
 
             return _normalToggle;
@@ -88,10 +42,10 @@ public static class GUIStylePreset
         {
             if (_tabButton == null)
             {
-                _tabButton = new GUIStyle(GUI.skin.button)
+                _tabButton = new GUIStyle(Theme.ButtonStyle)
                 {
-                    fontSize = 17,
-                    fontStyle = FontStyle.Bold,
+                    fontSize = 15,
+                    fontStyle = FontStyle.Bold
                 };
             }
 
@@ -99,39 +53,29 @@ public static class GUIStylePreset
         }
     }
 
-    public static GUIStyle TabTitle
-    {
-        get
-        {
-            if (_tabTitle == null)
-            {
-                _tabTitle = new GUIStyle(GUI.skin.label)
-                {
-                    fontSize = 20,
-                    fontStyle = FontStyle.Bold,
-                    alignment = TextAnchor.MiddleLeft,
-                };
-            }
-
-            return _tabTitle;
-        }
-    }
+    public static GUIStyle TabTitle => Theme.TitleStyle;
 
     public static GUIStyle TabSubtitle
     {
         get
         {
-            if (_tabSubtitle == null)
-            {
-                _tabSubtitle = new GUIStyle(GUI.skin.label)
-                {
-                    fontSize = 16,
-                    fontStyle = FontStyle.Bold,
-                    alignment = TextAnchor.MiddleLeft,
-                };
-            }
-
-            return _tabSubtitle;
+            var s = Theme.SectionStyle;
+            s.fontSize = 14;
+            s.fontStyle = FontStyle.Bold;
+            s.normal.textColor = Theme.TextSecondary;
+            return s;
         }
+    }
+
+    private static GUIStyle MakeDivider(Color color)
+    {
+        var style = new GUIStyle(GUI.skin.box)
+        {
+            margin = new RectOffset { top = 4, bottom = 4 },
+            padding = new RectOffset(),
+            border = new RectOffset()
+        };
+        style.normal.background = Theme.SolidTinted(color);
+        return style;
     }
 }

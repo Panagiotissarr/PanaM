@@ -785,6 +785,8 @@ public static class Utils
 
         UnityEngine.Object.Destroy(PanaM.keybindListener);
 
+        BackdropBlur.DestroyInstance();
+
         PanicCleaner.Create();
     }
 }

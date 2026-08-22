@@ -9,6 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
+desktop.ini
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -403,3 +404,8 @@ FodyWeavers.xsd
 # QuickBuild
 package.json
 dist/
+
+# AI
+AGENTS.md
+.env
+.gitignore

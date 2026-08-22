@@ -7,7 +7,6 @@ public class OverloadTab : ITab
 {
     public string name => "Overload";
 
-    private GUIStyle _sliderSubtitle;
     private int _maxStrength = 100000;
     private float _maxCooldown = 1f;
     private float _fpsEstimate = 0f;
@@ -16,68 +15,98 @@ public class OverloadTab : ITab
 
     public void Draw()
     {
-        InitStyles();
-
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
-        DrawGeneral();
+        Widgets.BeginSection("General");
 
-        GUILayout.Space(15);
+        CheatToggles.showOverload = Widgets.Toggle(CheatToggles.showOverload, "Show Overload Menu");
 
-        DrawSettingsToggle();
+        CheatToggles.showOverloadSettings = Widgets.Toggle(CheatToggles.showOverloadSettings, "Show Overload Settings");
 
-        GUILayout.EndVertical();
+        Widgets.EndSection();
+
+        GUILayout.Space(4);
 
         if (CheatToggles.showOverloadSettings)
         {
-            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(MenuUI.windowWidth * 0.75f));
-
             DrawSettingsSection();
-
-            GUILayout.EndVertical();
         }
-    }
 
-    private void InitStyles()
-    {
-        if (_sliderSubtitle == null)
-        {
-            _sliderSubtitle = new(GUIStylePreset.TabSubtitle)
-            {
-                fontStyle = FontStyle.Normal
-            };
-        }
-    }
-
-    private void DrawGeneral()
-    {
-        CheatToggles.showOverload = GUILayout.Toggle(CheatToggles.showOverload, " Show Overload Menu");
-    }
-
-    private void DrawSettingsToggle()
-    {
-        GUILayout.Label("Settings", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.showOverloadSettings = GUILayout.Toggle(CheatToggles.showOverloadSettings, " Show Overload Settings");
+        GUILayout.EndVertical();
     }
 
     private void DrawSettingsSection()
     {
-        GUILayout.Space(15);
+        Widgets.BeginSection("Performance");
 
-        GUILayout.BeginHorizontal();
+        DrawStatsHeader();
 
-        GUILayout.Space(10);
+        GUILayout.Space(8);
 
-        GUILayout.BeginVertical();
+        DrawSettingsSliders();
 
-        GUILayout.BeginHorizontal();
+        Widgets.EndSection();
 
-        CheatToggles.olAutoAdapt = GUILayout.Toggle(CheatToggles.olAutoAdapt, " Auto Adapt");
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("General");
+
+        CheatToggles.olAutoStart = Widgets.Toggle(CheatToggles.olAutoStart, "Auto Start when Ready");
+
+        CheatToggles.olAutoStop = Widgets.Toggle(CheatToggles.olAutoStop, "Auto Stop when Done");
+
+        CheatToggles.olLockTargets = Widgets.Toggle(CheatToggles.olLockTargets, "Lock Targets on Start");
+
+        CheatToggles.olKillSwitch = Widgets.Toggle(CheatToggles.olKillSwitch, "Kill Switch on Lag");
+
+        if (CheatToggles.olKillSwitch)
+        {
+            var old = GUI.backgroundColor;
+            GUI.backgroundColor = Theme.DangerColor;
+
+            if (GUILayout.Button($"{OverloadUI.killSwitchThreshold} ms", Theme.ButtonStyle, GUILayout.Width(110f)))
+            {
+                if (OverloadUI.killSwitchThreshold >= 3000) // Max KS = 3000 ms
+                {
+                    OverloadUI.killSwitchThreshold = 500; // Min KS = 500 ms
+                }
+                else
+                {
+                    OverloadUI.killSwitchThreshold = OverloadUI.killSwitchThreshold + 500; // Increment by 500 ms steps
+                }
+            }
+
+            GUI.backgroundColor = old;
+        }
+
+        Widgets.EndSection();
+
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Logs");
+
+        CheatToggles.olLogStartStop = Widgets.Toggle(CheatToggles.olLogStartStop, "Log START and STOP");
+
+        CheatToggles.olLogAddRemove = Widgets.Toggle(CheatToggles.olLogAddRemove, "Log ADD and REMOVE");
+
+        CheatToggles.olLogAttack = Widgets.Toggle(CheatToggles.olLogAttack, "Log Attack");
+
+        CheatToggles.olLogDisconnect = Widgets.Toggle(CheatToggles.olLogDisconnect, "Log Disconnect");
+
+        CheatToggles.olVerboseLogs = Widgets.Toggle(CheatToggles.olVerboseLogs, "Verbose Attack Logs");
+
+        CheatToggles.olAutoClear = Widgets.Toggle(CheatToggles.olAutoClear, "Auto Clear on Start");
+
+        Widgets.EndSection();
+    }
+
+    private void DrawStatsHeader()
+    {
+        CheatToggles.olAutoAdapt = Widgets.Toggle(CheatToggles.olAutoAdapt, "Auto Adapt");
 
         int ping = Utils.GetPing();
         string pingStr = $"PING : {ping} ms";
-        GUILayout.Label(Utils.GetColoredPingText(pingStr, ping));
+        Widgets.MutedLabel(Utils.GetColoredPingText(pingStr, ping));
 
         int strength = OverloadHandler.strength;
         float cooldown = OverloadHandler.cooldown;
@@ -112,91 +141,18 @@ public class OverloadTab : ITab
                         ? $"{rpcPerTarget*Math.Max(1, numTargetsPerSec)}"
                         : $"{rpcPerTarget}x{numTargetsPerSec}";
 
-        CheatToggles.olShowRpcTotal = GUILayout.Toggle(CheatToggles.olShowRpcTotal, $" RPC/s : {rpcStr}{extraStr}");
-
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(15);
-
-        DrawSettingsSliders();
-
-        GUILayout.EndVertical();
-
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(10);
-
-        GUILayout.BeginHorizontal();
-
-        GUILayout.Space(10);
-
-        GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.35f));
-
-        GUILayout.Label("General", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.olAutoStart = GUILayout.Toggle(CheatToggles.olAutoStart, " Auto Start when Ready");
-
-        CheatToggles.olAutoStop = GUILayout.Toggle(CheatToggles.olAutoStop, " Auto Stop when Done");
-
-        CheatToggles.olLockTargets = GUILayout.Toggle(CheatToggles.olLockTargets, " Lock Targets on Start");
-
-        CheatToggles.olKillSwitch = GUILayout.Toggle(CheatToggles.olKillSwitch, " Kill Switch on Lag");
-
-        if (CheatToggles.olKillSwitch)
-        {
-            Color standardBackgroundColor = GUI.backgroundColor;
-            GUI.backgroundColor = Color.red;
-
-            bool isPressed = GUILayout.Button($"{OverloadUI.killSwitchThreshold} ms", GUILayout.Width(70f));
-            if (isPressed)
-            {
-                if (OverloadUI.killSwitchThreshold >= 3000) // Max KS = 3000 ms
-                {
-                    OverloadUI.killSwitchThreshold = 500; // Min KS = 500 ms
-                }
-                else
-                {
-                    OverloadUI.killSwitchThreshold = OverloadUI.killSwitchThreshold + 500; // Increment by 500 ms steps
-                }
-            }
-
-            GUI.backgroundColor = standardBackgroundColor;
-        }
-
-        GUILayout.EndVertical();
-
-        GUILayout.BeginVertical();
-
-        GUILayout.Label("Logs", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.olLogStartStop = GUILayout.Toggle(CheatToggles.olLogStartStop, " Log START and STOP");
-
-        CheatToggles.olLogAddRemove = GUILayout.Toggle(CheatToggles.olLogAddRemove, " Log ADD and REMOVE");
-
-        CheatToggles.olLogAttack = GUILayout.Toggle(CheatToggles.olLogAttack, " Log Attack");
-
-        CheatToggles.olLogDisconnect = GUILayout.Toggle(CheatToggles.olLogDisconnect, " Log Disconnect");
-
-        CheatToggles.olVerboseLogs = GUILayout.Toggle(CheatToggles.olVerboseLogs, " Verbose Attack Logs");
-
-        CheatToggles.olAutoClear = GUILayout.Toggle(CheatToggles.olAutoClear, " Auto Clear on Start");
-
-        GUILayout.EndVertical();
-
-        GUILayout.EndHorizontal();
-
-        GUILayout.Space(15);
+        CheatToggles.olShowRpcTotal = Widgets.Toggle(CheatToggles.olShowRpcTotal, $"RPC/s : {rpcStr}{extraStr}");
     }
 
     private void DrawSettingsSliders()
     {
-        GUILayout.Label($"Strength : {_rawStrength}", _sliderSubtitle);
+        Widgets.MutedLabel($"Strength : {_rawStrength}");
 
         GUILayout.Space(1);
 
         GUILayout.BeginHorizontal();
 
-        float inputStrength = GUILayout.HorizontalSlider(_rawStrength, 1, _maxStrength, GUILayout.Width(350f));
+        float inputStrength = GUILayout.HorizontalSlider(_rawStrength, 1, _maxStrength, GUILayout.Width(280f));
 
         if (inputStrength != _rawStrength)
         {
@@ -207,19 +163,19 @@ public class OverloadTab : ITab
         GUILayout.Space(5);
 
         string maxStrengthStr = _maxStrength % 1000 == 0 ? $"{_maxStrength / 1000}K" : $"{_maxStrength}";
-        bool isPressedMaxStrength = GUILayout.Button(maxStrengthStr, GUILayout.Width(51f));
+        bool isPressedMaxStrength = Widgets.Button(maxStrengthStr, GUILayout.Width(51f), GUILayout.Height(22f));
 
         GUILayout.EndHorizontal();
 
         GUILayout.Space(10);
 
-        GUILayout.Label($"Cooldown : {_rawCooldown:F2}", _sliderSubtitle);
+        Widgets.MutedLabel($"Cooldown : {_rawCooldown:F2}");
 
         GUILayout.Space(1);
 
         GUILayout.BeginHorizontal();
 
-        float inputCooldown = GUILayout.HorizontalSlider(_rawCooldown, 0f, _maxCooldown, GUILayout.Width(350f));
+        float inputCooldown = GUILayout.HorizontalSlider(_rawCooldown, 0f, _maxCooldown, GUILayout.Width(280f));
 
         if (inputCooldown != _rawCooldown)
         {
@@ -229,7 +185,7 @@ public class OverloadTab : ITab
 
         GUILayout.Space(5);
 
-        bool isPressedMaxCooldown = GUILayout.Button($"{_maxCooldown:F0}", GUILayout.Width(51f));
+        bool isPressedMaxCooldown = Widgets.Button($"{_maxCooldown:F0}", GUILayout.Width(51f), GUILayout.Height(22f));
 
         GUILayout.EndHorizontal();
 

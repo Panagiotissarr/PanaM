@@ -12,110 +12,86 @@ public class RolesTab : ITab
 
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
-        DrawGeneral();
+        Widgets.BeginSection("General");
 
-        GUILayout.Space(15);
+        CheatToggles.setFakeRole = Widgets.Toggle(CheatToggles.setFakeRole, "Set Fake Role");
 
-        DrawImpostor();
+        CheatToggles.setFakeAlive = Widgets.Toggle(CheatToggles.setFakeAlive, "Set Fake Alive");
 
-        GUILayout.Space(15);
+        Widgets.EndSection();
 
-        DrawShapeshifter();
+        GUILayout.Space(4);
 
-        GUILayout.Space(15);
+        Widgets.BeginSection("Impostor");
 
-        DrawCrewmate();
+        CheatToggles.killReach = Widgets.Toggle(CheatToggles.killReach, "Kill Reach");
 
-        GUILayout.Space(15);
+        Widgets.EndSection();
 
-        DrawTracker();
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Shapeshifter");
+
+        CheatToggles.noShapeshiftAnim = Widgets.Toggle(CheatToggles.noShapeshiftAnim, "No Ss Animation");
+
+        CheatToggles.endlessSsDuration = Widgets.Toggle(CheatToggles.endlessSsDuration, "Endless Ss Duration");
+
+        Widgets.EndSection();
+
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Crewmate");
+
+        CheatToggles.showTasksMenu = Widgets.Toggle(CheatToggles.showTasksMenu, "Show Tasks Menu");
+
+        Widgets.EndSection();
+
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Tracker");
+
+        CheatToggles.endlessTracking = Widgets.Toggle(CheatToggles.endlessTracking, "Endless Tracking");
+
+        CheatToggles.noTrackingDelay = Widgets.Toggle(CheatToggles.noTrackingDelay, "No Track Delay");
+
+        CheatToggles.noTrackingCooldown = Widgets.Toggle(CheatToggles.noTrackingCooldown, "No Track Cooldown");
+
+        CheatToggles.trackReach = Widgets.Toggle(CheatToggles.trackReach, "Track Reach");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
 
         GUILayout.BeginVertical();
 
-        DrawEngineer();
+        Widgets.BeginSection("Engineer");
 
-        GUILayout.Space(15);
+        CheatToggles.endlessVentTime = Widgets.Toggle(CheatToggles.endlessVentTime, "Endless Vent Time");
 
-        DrawScientist();
+        CheatToggles.noVentCooldown = Widgets.Toggle(CheatToggles.noVentCooldown, "No Vent Cooldown");
 
-        GUILayout.Space(15);
+        Widgets.EndSection();
 
-        DrawDetective();
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Scientist");
+
+        CheatToggles.endlessBattery = Widgets.Toggle(CheatToggles.endlessBattery, "Endless Battery");
+
+        CheatToggles.noVitalsCooldown = Widgets.Toggle(CheatToggles.noVitalsCooldown, "No Vitals Cooldown");
+
+        Widgets.EndSection();
+
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Detective");
+
+        CheatToggles.interrogateReach = Widgets.Toggle(CheatToggles.interrogateReach, "Interrogate Reach");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
 
         GUILayout.EndHorizontal();
-    }
-
-    private void DrawGeneral()
-    {
-        CheatToggles.setFakeRole = GUILayout.Toggle(CheatToggles.setFakeRole, " Set Fake Role");
-
-        CheatToggles.setFakeAlive = GUILayout.Toggle(CheatToggles.setFakeAlive, " Set Fake Alive");
-    }
-
-    private void DrawImpostor()
-    {
-        GUILayout.Label("Impostor", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.killReach = GUILayout.Toggle(CheatToggles.killReach, " Kill Reach");
-
-        // CheatToggles.impostorTasks = GUILayout.Toggle(CheatToggles.impostorTasks, " Allow Tasks");
-    }
-
-    private void DrawShapeshifter()
-    {
-        GUILayout.Label("Shapeshifter", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.noShapeshiftAnim = GUILayout.Toggle(CheatToggles.noShapeshiftAnim, " No Ss Animation");
-
-        CheatToggles.endlessSsDuration = GUILayout.Toggle(CheatToggles.endlessSsDuration, " Endless Ss Duration");
-    }
-
-    private void DrawCrewmate()
-    {
-        GUILayout.Label("Crewmate", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.showTasksMenu = GUILayout.Toggle(CheatToggles.showTasksMenu, " Show Tasks Menu");
-    }
-
-    private void DrawTracker()
-    {
-        GUILayout.Label("Tracker", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.endlessTracking = GUILayout.Toggle(CheatToggles.endlessTracking, " Endless Tracking");
-
-        CheatToggles.noTrackingDelay = GUILayout.Toggle(CheatToggles.noTrackingDelay, " No Track Delay");
-
-        CheatToggles.noTrackingCooldown = GUILayout.Toggle(CheatToggles.noTrackingCooldown, " No Track Cooldown");
-
-        CheatToggles.trackReach = GUILayout.Toggle(CheatToggles.trackReach, " Track Reach");
-    }
-
-    private void DrawEngineer()
-    {
-        GUILayout.Label("Engineer", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.endlessVentTime = GUILayout.Toggle(CheatToggles.endlessVentTime, " Endless Vent Time");
-
-        CheatToggles.noVentCooldown = GUILayout.Toggle(CheatToggles.noVentCooldown, " No Vent Cooldown");
-    }
-
-    private void DrawScientist()
-    {
-        GUILayout.Label("Scientist", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.endlessBattery = GUILayout.Toggle(CheatToggles.endlessBattery, " Endless Battery");
-
-        CheatToggles.noVitalsCooldown = GUILayout.Toggle(CheatToggles.noVitalsCooldown, " No Vitals Cooldown");
-    }
-
-    private void DrawDetective()
-    {
-        GUILayout.Label("Detective", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.interrogateReach = GUILayout.Toggle(CheatToggles.interrogateReach, " Interrogate Reach");
     }
 }

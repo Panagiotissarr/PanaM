@@ -29,12 +29,25 @@ public class ProtectUI : MonoBehaviour
         if (!CheatToggles.showProtectMenu || !(MenuUI.isGUIActive || PanaM.menuKeepSubwindowsOpen.Value) || PanaM.isPanicked) return;
 
         UIHelpers.ApplyUIColor();
+        Theme.ApplySkinTheme();
 
-        _windowRect = GUI.Window((int)WindowId.ProtectUI, _windowRect, (GUI.WindowFunction)ProtectWindow, "Protect Players");
+        _windowRect = GUI.Window((int)WindowId.ProtectUI, _windowRect, (GUI.WindowFunction)ProtectWindow,
+            GUIContent.none, Theme.InvisibleWindowStyle);
     }
 
     private void ProtectWindow(int windowID)
     {
+        var rect = new Rect(0, 0, _windowRect.width, _windowRect.height);
+
+        Theme.DrawWindowChrome(rect);
+
+        GUI.Label(new Rect(16, 10, rect.width - 32, 20), "PROTECT PLAYERS", Theme.SectionStyle);
+
+        GUILayout.Space(34);
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(12);
+
         GUILayout.BeginVertical();
 
         _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, true);
@@ -57,21 +70,21 @@ public class ProtectUI : MonoBehaviour
 
             if (player.protectedByGuardianId == -1)
             {
-                GUILayout.Label("<color=#FF0000>Unprotected</color>", GUILayout.Width(135));
+                GUILayout.Label("<color=#F85149>Unprotected</color>", GUILayout.Width(135));
             }
             else
             {
                 NetworkedPlayerInfo guardianInfo = GameData.Instance.GetPlayerById((byte)player.protectedByGuardianId);
-                GUILayout.Label($"<color=#00FF00>Protected</color> by <color=#{ColorUtility.ToHtmlStringRGB(guardianInfo.Color)}>{guardianInfo._object.Data.PlayerName}</color>", GUILayout.Width(135));
+                GUILayout.Label($"<color=#3FB950>Protected</color> by <color=#{ColorUtility.ToHtmlStringRGB(guardianInfo.Color)}>{guardianInfo._object.Data.PlayerName}</color>", GUILayout.Width(135));
             }
 
-            if (GUILayout.Button("Protect", GUIStylePreset.NormalButton) && Utils.isHost && !Utils.isLobby)
+            if (Widgets.AccentButton("Protect", GUILayout.Width(80), GUILayout.Height(24)) && Utils.isHost && !Utils.isLobby)
             {
                 PlayerControl.LocalPlayer.RpcProtectPlayer(player, player.cosmetics.ColorId);
             }
 
             var keepProtected = playersToProtect.Contains(player);
-            keepProtected = GUILayout.Toggle(keepProtected, "Keep protected", GUIStylePreset.NormalToggle);
+            keepProtected = Widgets.Toggle(keepProtected, "Keep");
 
             if (keepProtected && !playersToProtect.Contains(player))
             {
@@ -89,7 +102,7 @@ public class ProtectUI : MonoBehaviour
 
         GUILayout.BeginHorizontal();
 
-        if (GUILayout.Button("Protect Everyone") && Utils.isHost && !Utils.isLobby)
+        if (Widgets.AccentButton("Protect Everyone", GUILayout.Height(26)) && Utils.isHost && !Utils.isLobby)
         {
             foreach (var player in PlayerControl.AllPlayerControls)
             {
@@ -99,7 +112,7 @@ public class ProtectUI : MonoBehaviour
 
         GUILayout.FlexibleSpace();
 
-        _keepEveryoneProtected = GUILayout.Toggle(_keepEveryoneProtected, "Keep Everyone Protected");
+        _keepEveryoneProtected = Widgets.Toggle(_keepEveryoneProtected, "Keep Everyone Protected");
 
         if (_keepEveryoneProtected)
         {
@@ -123,6 +136,11 @@ public class ProtectUI : MonoBehaviour
 
         GUILayout.EndVertical();
 
-        GUI.DragWindow();
+        GUILayout.Space(12);
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
+
+        GUI.DragWindow(new Rect(0, 0, rect.width, 26));
     }
 }

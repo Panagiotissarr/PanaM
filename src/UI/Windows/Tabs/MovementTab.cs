@@ -13,7 +13,7 @@ public class MovementTab : ITab
 
         DrawGeneral();
 
-        GUILayout.Space(15);
+        GUILayout.Space(4);
 
         DrawTeleport();
 
@@ -22,9 +22,11 @@ public class MovementTab : ITab
 
     private void DrawGeneral()
     {
-        CheatToggles.noClip = GUILayout.Toggle(CheatToggles.noClip, " NoClip");
+        Widgets.BeginSection("General");
 
-        CheatToggles.invertControls = GUILayout.Toggle(CheatToggles.invertControls, " Invert Controls");
+        CheatToggles.noClip = Widgets.Toggle(CheatToggles.noClip, "NoClip");
+
+        CheatToggles.invertControls = Widgets.Toggle(CheatToggles.invertControls, "Invert Controls");
 
         try
         {
@@ -41,14 +43,18 @@ public class MovementTab : ITab
                 GUILayout.Label($"Current Speed: {PlayerControl.LocalPlayer?.MyPhysics.Speed} {(Utils.IsSpeedDefault() ? "(Default)" : "")}");
             }
         } catch (NullReferenceException) {}
+
+        Widgets.EndSection();
     }
 
     private void DrawTeleport()
     {
-        GUILayout.Label("Teleport", GUIStylePreset.TabSubtitle);
+        Widgets.BeginSection("Teleport");
 
-        CheatToggles.teleportCursor = GUILayout.Toggle(CheatToggles.teleportCursor, " to Cursor");
+        CheatToggles.teleportCursor = Widgets.Toggle(CheatToggles.teleportCursor, "to Cursor");
 
-        CheatToggles.teleportPlayer = GUILayout.Toggle(CheatToggles.teleportPlayer, " to Player");
+        CheatToggles.teleportPlayer = Widgets.Toggle(CheatToggles.teleportPlayer, "to Player");
+
+        Widgets.EndSection();
     }
 }

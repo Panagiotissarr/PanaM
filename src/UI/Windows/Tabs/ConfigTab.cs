@@ -10,19 +10,18 @@ public class ConfigTab : ITab
     {
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
-        DrawGeneral();
+        Widgets.BeginSection("General");
+
+        CheatToggles.openConfig = Widgets.Toggle(CheatToggles.openConfig, "Open Config");
+
+        CheatToggles.reloadConfig = Widgets.Toggle(CheatToggles.reloadConfig, "Reload Config");
+
+        CheatToggles.saveProfile = Widgets.Toggle(CheatToggles.saveProfile, "Save to Profile");
+
+        CheatToggles.loadProfile = Widgets.Toggle(CheatToggles.loadProfile, "Load from Profile");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
-    }
-
-    private void DrawGeneral()
-    {
-        CheatToggles.openConfig = GUILayout.Toggle(CheatToggles.openConfig, " Open Config");
-
-        CheatToggles.reloadConfig = GUILayout.Toggle(CheatToggles.reloadConfig, " Reload Config");
-
-        CheatToggles.saveProfile = GUILayout.Toggle(CheatToggles.saveProfile, " Save to Profile");
-
-        CheatToggles.loadProfile = GUILayout.Toggle(CheatToggles.loadProfile, " Load from Profile");
     }
 }

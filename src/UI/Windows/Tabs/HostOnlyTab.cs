@@ -12,74 +12,60 @@ public class HostOnlyTab : ITab
 
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
-        DrawGeneral();
+        Widgets.BeginSection("General");
 
-        GUILayout.Space(15);
+        CheatToggles.killVanished = Widgets.Toggle(CheatToggles.killVanished, "Kill While Vanished");
 
-        DrawMurder();
+        CheatToggles.killAnyone = Widgets.Toggle(CheatToggles.killAnyone, "Kill Anyone");
 
-        GUILayout.Space(15);
+        CheatToggles.noKillCd = Widgets.Toggle(CheatToggles.noKillCd, "No Kill Cooldown");
 
-        DrawGameState();
+        CheatToggles.showProtectMenu = Widgets.Toggle(CheatToggles.showProtectMenu, "Show Protect Menu");
+
+        Widgets.EndSection();
+
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Murder");
+
+        CheatToggles.killPlayer = Widgets.Toggle(CheatToggles.killPlayer, "Kill Player");
+
+        CheatToggles.telekillPlayer = Widgets.Toggle(CheatToggles.telekillPlayer, "Telekill Player");
+
+        CheatToggles.killAllCrew = Widgets.Toggle(CheatToggles.killAllCrew, "Kill All Crewmates");
+
+        CheatToggles.killAllImps = Widgets.Toggle(CheatToggles.killAllImps, "Kill All Impostors");
+
+        CheatToggles.killAll = Widgets.Toggle(CheatToggles.killAll, "Kill Everyone");
+
+        Widgets.EndSection();
+
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Game State");
+
+        CheatToggles.forceStartGame = Widgets.Toggle(CheatToggles.forceStartGame, "Force Start Game");
+
+        CheatToggles.noGameEnd = Widgets.Toggle(CheatToggles.noGameEnd, "No Game End");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
 
         GUILayout.BeginVertical();
 
-        DrawMeetings();
+        Widgets.BeginSection("Meetings");
+
+        CheatToggles.skipMeeting = Widgets.Toggle(CheatToggles.skipMeeting, "Skip Meeting");
+
+        CheatToggles.voteImmune = Widgets.Toggle(CheatToggles.voteImmune, "Vote Immune");
+
+        CheatToggles.ejectPlayer = Widgets.Toggle(CheatToggles.ejectPlayer, "Eject Player");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
 
         GUILayout.EndHorizontal();
-    }
-
-    private void DrawGeneral()
-    {
-        CheatToggles.killVanished = GUILayout.Toggle(CheatToggles.killVanished, " Kill While Vanished");
-
-        CheatToggles.killAnyone = GUILayout.Toggle(CheatToggles.killAnyone, " Kill Anyone");
-
-        CheatToggles.noKillCd = GUILayout.Toggle(CheatToggles.noKillCd, " No Kill Cooldown");
-
-        CheatToggles.showProtectMenu = GUILayout.Toggle(CheatToggles.showProtectMenu, " Show Protect Menu");
-
-        // CheatToggles.forceRole = GUILayout.Toggle(CheatToggles.forceRole, " Force Role");
-
-        // CheatToggles.noOptionsLimits = GUILayout.Toggle(CheatToggles.noOptionsLimits, " No Options Limits");
-    }
-
-    private void DrawMurder()
-    {
-        GUILayout.Label("Murder", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.killPlayer = GUILayout.Toggle(CheatToggles.killPlayer, " Kill Player");
-
-        CheatToggles.telekillPlayer = GUILayout.Toggle(CheatToggles.telekillPlayer, " Telekill Player");
-
-        CheatToggles.killAllCrew = GUILayout.Toggle(CheatToggles.killAllCrew, " Kill All Crewmates");
-
-        CheatToggles.killAllImps = GUILayout.Toggle(CheatToggles.killAllImps, " Kill All Impostors");
-
-        CheatToggles.killAll = GUILayout.Toggle(CheatToggles.killAll, " Kill Everyone");
-    }
-
-    private void DrawGameState()
-    {
-        GUILayout.Label("Game State", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.forceStartGame = GUILayout.Toggle(CheatToggles.forceStartGame, " Force Start Game");
-
-        CheatToggles.noGameEnd = GUILayout.Toggle(CheatToggles.noGameEnd, " No Game End");
-    }
-
-    private void DrawMeetings()
-    {
-        GUILayout.Label("Meetings", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.skipMeeting = GUILayout.Toggle(CheatToggles.skipMeeting, " Skip Meeting");
-
-        CheatToggles.voteImmune = GUILayout.Toggle(CheatToggles.voteImmune, " Vote Immune");
-
-        CheatToggles.ejectPlayer = GUILayout.Toggle(CheatToggles.ejectPlayer, " Eject Player");
     }
 }

@@ -32,17 +32,30 @@ public class ConsoleUI : MonoBehaviour
 
         _logStyle ??= new GUIStyle(GUI.skin.label)
         {
-            fontSize = 16
+            fontSize = 14
         };
 
         UIHelpers.ApplyUIColor();
+        Theme.ApplySkinTheme();
 
-        _windowRect = GUI.Window((int)WindowId.ConsoleUI, _windowRect, (GUI.WindowFunction)ConsoleWindow, "Console");
+        _windowRect = GUI.Window((int)WindowId.ConsoleUI, _windowRect, (GUI.WindowFunction)ConsoleWindow,
+            GUIContent.none, Theme.InvisibleWindowStyle);
     }
 
     private void ConsoleWindow(int windowID)
     {
-        GUILayout.BeginVertical(GUI.skin.box);
+        var rect = new Rect(0, 0, _windowRect.width, _windowRect.height);
+
+        Theme.DrawWindowChrome(rect);
+
+        GUI.Label(new Rect(16, 10, rect.width - 32, 20), "CONSOLE", Theme.SectionStyle);
+
+        GUILayout.Space(34);
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(12);
+
+        GUILayout.BeginVertical();
 
         _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, false);
 
@@ -55,21 +68,28 @@ public class ConsoleUI : MonoBehaviour
 
         GUILayout.EndVertical();
 
-        GUILayout.BeginHorizontal();
+        GUILayout.Space(12);
+        GUILayout.EndHorizontal();
 
-        if (GUILayout.Button("Clear Log", GUILayout.Width(260)))
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(12);
+
+        if (Widgets.Button("Clear Log", GUILayout.Width(120), GUILayout.Height(26)))
         {
             _logEntries.Clear();
         }
 
-        if (GUILayout.Button("Copy Log to Clipboard"))
+        if (Widgets.Button("Copy Log to Clipboard", GUILayout.Width(170), GUILayout.Height(26)))
         {
             GUIUtility.systemCopyBuffer = String.Join("\n", _logEntries.ToArray());
         }
 
+        GUILayout.Space(12);
         GUILayout.EndHorizontal();
 
-        GUI.DragWindow();
+        GUILayout.Space(10);
+
+        GUI.DragWindow(new Rect(0, 0, rect.width, 26));
     }
 
     public static void Log(string message)

@@ -10,34 +10,28 @@ public class AnimationsTab : ITab
     {
         GUILayout.BeginVertical(GUILayout.Width(MenuUI.windowWidth * 0.425f));
 
-        DrawGeneral();
+        Widgets.BeginSection("General");
 
-        GUILayout.Space(15);
+        CheatToggles.animShields = Widgets.Toggle(CheatToggles.animShields, "Shields");
 
-        DrawClientSided();
+        CheatToggles.animAsteroids = Widgets.Toggle(CheatToggles.animAsteroids, "Asteroids");
+
+        CheatToggles.animEmptyGarbage = Widgets.Toggle(CheatToggles.animEmptyGarbage, "Empty Garbage");
+
+        CheatToggles.animMedScan = Widgets.Toggle(CheatToggles.animMedScan, "Medbay Scan");
+
+        CheatToggles.animCamsInUse = Widgets.Toggle(CheatToggles.animCamsInUse, "Cams In Use");
+
+        Widgets.EndSection();
+
+        GUILayout.Space(4);
+
+        Widgets.BeginSection("Client-Sided");
+
+        CheatToggles.moonWalk = Widgets.Toggle(CheatToggles.moonWalk, "Moonwalk");
+
+        Widgets.EndSection();
 
         GUILayout.EndVertical();
-    }
-
-    private void DrawGeneral()
-    {
-        CheatToggles.animShields = GUILayout.Toggle(CheatToggles.animShields, " Shields");
-
-        CheatToggles.animAsteroids = GUILayout.Toggle(CheatToggles.animAsteroids, " Asteroids");
-
-        CheatToggles.animEmptyGarbage = GUILayout.Toggle(CheatToggles.animEmptyGarbage, " Empty Garbage");
-
-        CheatToggles.animMedScan = GUILayout.Toggle(CheatToggles.animMedScan, " Medbay Scan");
-
-        CheatToggles.animCamsInUse = GUILayout.Toggle(CheatToggles.animCamsInUse, " Cams In Use");
-
-        // CheatToggles.animPet = GUILayout.Toggle(CheatToggles.animPet, " Pet");
-    }
-
-    private void DrawClientSided()
-    {
-        GUILayout.Label("Client-Sided", GUIStylePreset.TabSubtitle);
-
-        CheatToggles.moonWalk = GUILayout.Toggle(CheatToggles.moonWalk, " Moonwalk");
     }
 }

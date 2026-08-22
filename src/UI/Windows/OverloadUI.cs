@@ -142,22 +142,31 @@ public class OverloadUI : MonoBehaviour
     {
         if (!CheatToggles.showOverload || !MenuUI.isGUIActive || PanaM.isPanicked) return;
 
+        UIHelpers.ApplyUIColor();
+        Theme.ApplySkinTheme();
+
         InitStyles();
 
-        UIHelpers.ApplyUIColor();
-
-        _windowRect = GUI.Window((int)WindowId.OverloadUI, _windowRect, (GUI.WindowFunction)OverloadWindow, "Overload");
+        _windowRect = GUI.Window((int)WindowId.OverloadUI, _windowRect, (GUI.WindowFunction)OverloadWindow,
+            GUIContent.none, Theme.InvisibleWindowStyle);
     }
 
     private void OverloadWindow(int windowID)
     {
-        GUILayout.BeginHorizontal();
+        var rect = new Rect(0, 0, _windowRect.width, _windowRect.height);
 
-        GUILayout.Space(15f);
+        Theme.DrawWindowChrome(rect);
+
+        GUI.Label(new Rect(16, 10, rect.width - 32, 20), "OVERLOAD", Theme.SectionStyle);
+
+        GUILayout.Space(34);
+
+        GUILayout.BeginHorizontal();
+        GUILayout.Space(14);
 
         GUILayout.BeginVertical();
 
-        GUILayout.Space(5f);
+        GUILayout.Space(2);
 
         var players = PlayerControl.AllPlayerControls.ToArray().Where(player => player?.Data != null && !player.AmOwner).ToArray();
         var playerCount = players.Length;
@@ -203,9 +212,9 @@ public class OverloadUI : MonoBehaviour
 
         GUILayout.Space(10f);
 
-        GUILayout.Box("", GUIStylePreset.DarkSeparator, GUILayout.Height(1f), GUILayout.Width(420f));
+        Widgets.Divider();
 
-        GUILayout.Space(10f);
+        GUILayout.Space(8);
 
         GUILayout.BeginHorizontal();
 
@@ -217,19 +226,26 @@ public class OverloadUI : MonoBehaviour
 
         GUILayout.EndHorizontal();
 
-        GUILayout.Space(20f);
+        GUILayout.Space(14);
 
-        GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(539f));
+        GUILayout.BeginHorizontal();
+
+        GUILayout.BeginVertical(Theme.CardStyle, GUILayout.Width(539f));
 
         DrawConsole();
 
         GUILayout.EndVertical();
 
-        GUILayout.EndVertical();
-
         GUILayout.EndHorizontal();
 
-        GUI.DragWindow();
+        GUILayout.Space(6);
+
+        GUILayout.EndVertical();
+
+        GUILayout.Space(14);
+        GUILayout.EndHorizontal();
+
+        GUI.DragWindow(new Rect(0, 0, rect.width, 26));
     }
 
     private void InitStyles()
@@ -254,7 +270,7 @@ public class OverloadUI : MonoBehaviour
         {
             _logStyle = new GUIStyle(GUI.skin.label)
             {
-                fontSize = 15
+                fontSize = 14
             };
         }
     }
@@ -327,12 +343,12 @@ public class OverloadUI : MonoBehaviour
             Color standardBackgroundColor = GUI.backgroundColor;
             Color standardContentColor = GUI.contentColor;
 
-            GUI.backgroundColor = isTarget ? Color.black : playerBackgroundColor;
+            GUI.backgroundColor = isTarget ? new Color(0.08f, 0.09f, 0.12f) : playerBackgroundColor;
             GUI.contentColor = playerContentColor;
 
             GUIStyle style = isTarget ? _targetButtonStyle : _normalButtonStyle;
 
-            bool isPressed = GUILayout.Button(playerData.DefaultOutfit.PlayerName, style, GUILayout.Width(140f));
+            bool isPressed = GUILayout.Button(playerData.DefaultOutfit.PlayerName, style, GUILayout.Width(140f), GUILayout.Height(28f));
 
             if (isPressed && _areTargetsUnlocked)
             {
@@ -390,19 +406,19 @@ public class OverloadUI : MonoBehaviour
 
     private void DrawSelectionToggles()
     {
-        bool newOverloadAll = GUILayout.Toggle(CheatToggles.overloadAll, " All");
+        bool newOverloadAll = Widgets.Toggle(CheatToggles.overloadAll, "All");
         CheatToggles.overloadAll = _areTargetsUnlocked ? newOverloadAll : false;
 
-        bool newOverloadHost = GUILayout.Toggle(CheatToggles.overloadHost, " Host");
+        bool newOverloadHost = Widgets.Toggle(CheatToggles.overloadHost, "Host");
         CheatToggles.overloadHost = _areTargetsUnlocked ? newOverloadHost : false;
 
-        bool newOverloadCrew = GUILayout.Toggle(CheatToggles.overloadCrew, " Crewmates");
+        bool newOverloadCrew = Widgets.Toggle(CheatToggles.overloadCrew, "Crewmates");
         CheatToggles.overloadCrew = _areTargetsUnlocked ? newOverloadCrew : false;
 
-        bool newOverloadImps = GUILayout.Toggle(CheatToggles.overloadImps, " Impostors");
+        bool newOverloadImps = Widgets.Toggle(CheatToggles.overloadImps, "Impostors");
         CheatToggles.overloadImps = _areTargetsUnlocked ? newOverloadImps : false;
 
-        bool newOverloadReset = GUILayout.Toggle(CheatToggles.overloadReset, " Reset");
+        bool newOverloadReset = Widgets.Toggle(CheatToggles.overloadReset, "Reset");
         CheatToggles.overloadReset = _areTargetsUnlocked ? newOverloadReset : false;
     }
 
@@ -412,10 +428,9 @@ public class OverloadUI : MonoBehaviour
 
         bool startEnabled = !CheatToggles.runOverload && Utils.isPlayer;
 
-        Color startBackgroundColor = Color.green;
-        GUI.backgroundColor = startEnabled ? startBackgroundColor : Color.black;
+        GUI.backgroundColor = startEnabled ? Theme.SuccessColor : new Color(0.08f, 0.09f, 0.12f);
 
-        if (GUILayout.Button("START", GUILayout.Width(140f)) && startEnabled)
+        if (GUILayout.Button("START", _normalButtonStyle, GUILayout.Width(140f), GUILayout.Height(30f)) && startEnabled)
         {
             StartOverload();
         }
@@ -426,10 +441,9 @@ public class OverloadUI : MonoBehaviour
         // Utils.isPlayer check is unnecessary as MenuUI check already enforces it for runOverload
         bool stopEnabled = CheatToggles.runOverload;
 
-        Color stopBackgroundColor = Color.red;
-        GUI.backgroundColor = stopEnabled ? stopBackgroundColor : Color.black;
+        GUI.backgroundColor = stopEnabled ? Theme.DangerColor : new Color(0.08f, 0.09f, 0.12f);
 
-        if (GUILayout.Button("STOP", GUILayout.Width(140f)) && stopEnabled)
+        if (GUILayout.Button("STOP", _normalButtonStyle, GUILayout.Width(140f), GUILayout.Height(30f)) && stopEnabled)
         {
             StopOverload();
         }
@@ -479,7 +493,7 @@ public class OverloadUI : MonoBehaviour
 
     private void DrawConsole()
     {
-        _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, false);
+        _scrollPosition = GUILayout.BeginScrollView(_scrollPosition, false, false, GUILayout.Height(180f));
 
         foreach (var log in _logEntries)
         {
@@ -490,7 +504,7 @@ public class OverloadUI : MonoBehaviour
 
         GUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
 
-        if (GUILayout.Button("Clear Log"))
+        if (Widgets.Button("Clear Log", GUILayout.Width(110), GUILayout.Height(24)))
         {
             _logEntries.Clear();
         }

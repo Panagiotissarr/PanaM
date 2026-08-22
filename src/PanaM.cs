@@ -39,6 +39,8 @@ public partial class PanaM : BasePlugin
     public static ConfigEntry<string> menuHtmlColor;
     public static ConfigEntry<bool> menuOpenOnMouse;
     public static ConfigEntry<bool> menuKeepSubwindowsOpen;
+    public static ConfigEntry<bool> menuBackdropBlur;
+    public static ConfigEntry<float> menuGlassOpacity;
     public static ConfigEntry<string> spoofLevel;
     public static ConfigEntry<string> spoofPlatform;
     public static ConfigEntry<bool> spoofDeviceId;
@@ -79,6 +81,19 @@ public partial class PanaM : BasePlugin
                                 "KeepSubwindowsOpen",
                                 false,
                                 "When enabled, closing the PanaM GUI will not automatically close its subwindows");
+
+        menuBackdropBlur = Config.Bind("PanaM.GUI",
+                                "BackdropBlur",
+                                true,
+                                "When enabled, the game behind the menu is really blurred for the frosted glass effect. Falls back to simulated frost if unsupported");
+
+        menuGlassOpacity = Config.Bind("PanaM.GUI",
+                                "GlassOpacity",
+                                0.86f,
+                                new ConfigDescription(
+                                    "How opaque the frosted glass panels are. Lower values show more of the blurred backdrop",
+                                    new AcceptableValueRange<float>(0.5f, 1f)
+                                ));
 
         autoLoadProfile = Config.Bind("PanaM.Profile",
                                 "AutoLoadProfile",
@@ -195,6 +210,8 @@ public partial class PanaM : BasePlugin
 
         // Components
         keybindListener = AddComponent<KeybindListener>();
+
+        BackdropBlur.Create();
 
         // Disables Telemetry (haven't fully tested if it works, but according to Unity docs it should)
         if (noTelemetry.Value)
