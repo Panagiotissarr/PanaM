@@ -46,7 +46,7 @@ jobs:
           Write-Host "::notice::Built PanaM v$version ($((Get-Item $dll.FullName).Length) bytes)"
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: PanaM-Release
           path: PanaM-*.zip
